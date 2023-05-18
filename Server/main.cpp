@@ -3,55 +3,154 @@
 #include "Engine/Engine.h"
 #include "Engine/ENGINE_EVENT.h"
 
-#include "Network/TCPAcceptor.h"
-#include "Network/TCPConnector.h"
+#include "TaskSystem/TaskSystem.h"
+
+#define SERVER_REPL
+
+#include "Global.h"
+
+void InitConsole(Engine* engine)
+{
+#ifdef SERVER_REPL
+	std::cout << "[Python]> ";
+	Task task;
+	task.Entry() = [](void* e) 
+	{
+		Engine* engine = (Engine*)e;
+
+		std::string line;
+		line.reserve(2048);
+		while (true)
+		{
+			std::getline(std::cin, line);
+
+			if (line == "quit")
+			{
+				engine->IsRunning() = false;
+				break;
+			}
+
+			String str = line.c_str();
+			Global::Get().replStr.enqueue(str);
+		}
+	};
+	task.Params() = engine;
+
+	TaskSystem::Submit(task, Task::CRITICAL);
+
+#endif // SERVER_REPL
+}
+
+#ifdef SERVER_REPL
+inline void EvalStr(const String& str)
+{
+	std::cout << str << "\n";
+}
+
+inline void ConsumeRepl()
+{
+	auto& queue = Global::Get().replStr;
+	String str;
+	bool eval = false;
+	while (queue.size_approx() != 0)
+	{
+		if (!queue.try_dequeue(str))
+		{
+			return;
+		}
+
+		EvalStr(str);
+		eval = true;
+	}
+
+	if (eval)
+		std::cout << "[Python]> ";
+}
+#endif // SERVER_REPL
+
 
 class ServerLoopHandler;
-ServerLoopHandler* g_handler = nullptr;
 
-Handle<TCPAcceptor> g_acceptor = nullptr;
-Handle<TCPConnector> g_clients[10];
-size_t g_clientCount = 0;
+Global* Global::s_instance = nullptr;
+
+inline auto& GetCurrentMatchingRoom()
+{
+	return Global::Get().gameRoom[Global::Get().gameRoomCount];
+}
 
 class ServerLoopHandler : public IterationHandler
 {
-	byte m_buffer[2048];
+	inline void UpdateAllRoom()
+	{
+		auto fixedDt = Global::Get().fixedDt;
+		for (size_t i = 0; i < Global::Get().gameRoomCount; i++)
+		{
+			auto& room = Global::Get().gameRoom[i];
+			if (room.id == INVALID_ID)
+			{
+				continue;
+			}
+
+			room.FixedIteration(fixedDt);
+		}
+	}
 
 	// Inherited via IterationHandler
 	virtual float DoIteration(float sumDt, Scene2D* scene) override
 	{
-		auto ret = g_acceptor->Accept(*g_clients[g_clientCount++].Get());
+#ifdef SERVER_REPL
+		ConsumeRepl();
+#endif // SERVER_REPL
 
-		std::cout << "Client connected " << g_clientCount << "\n";
+		auto& room = GetCurrentMatchingRoom();
+		auto& conn = room.GetClientConn(room.clientsCount);
+		auto ret = Global::Get().acceptor.Accept(conn);
 
-		auto len = g_clients[g_clientCount - 1]->Recv(m_buffer, 2048);
-		m_buffer[len] = '\0';
-		std::cout << "Client msg: " << (char*)m_buffer << '\n';
+		if (ret == 0)
+		{
+			room.InitializeClient(room.clientsCount);
+			conn.SetBlockingMode(false);
+			std::cout << "Client connected\n";
+			room.clientsCount++;
 
-		Thread::Sleep(100);
-		return 0;
+			if (room.clientsCount == 1)
+			{
+				room.id = 0;
+				Global::Get().gameRoomCount++;
+			}
+		}
+
+		auto fixedDt = Global::Get().fixedDt;
+		while (sumDt > fixedDt)
+		{
+			UpdateAllRoom();
+			sumDt -= fixedDt;
+		}
+
+		return sumDt;
 	}
 };
 
+
 void Initialize(Engine* engine)
 {
-	g_handler = new ServerLoopHandler();
+	Global::s_instance = new Global();
+	Global::Get().serverLoop = new ServerLoopHandler();
+	engine->SetIterationHandler(Global::Get().serverLoop);
 
 	TCP_SOCKET_DESCRIPTION desc;
 	desc.host = "0.0.0.0";
 	desc.port = 9023;
+	desc.useNonBlocking = true;
+	Global::Get().acceptor.Initialize(desc, Global::MAX_ROOMS * GameRoom::MAX_CLIENTS);
 
-	g_acceptor = mheap::New<TCPAcceptor>(desc, 10);
-	for (auto& c : g_clients)
-	{
-		c = mheap::New<TCPConnector>();
-	}
-	engine->SetIterationHandler(g_handler);
-	std::cout << "Hello, Server!\n";
+	InitConsole(engine);
 }
 
 void Finalize(Engine* engine)
 {
-	delete g_handler;
 	std::cout << "Bye!\n";
+
+	delete Global::Get().serverLoop;
+	delete Global::s_instance;
 }

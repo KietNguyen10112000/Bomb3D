@@ -3,7 +3,7 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <LocalDebuggerCommand>$(SOFT_ENGINE_HOME)/build/bin/Debug/Engine.exe</LocalDebuggerCommand>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>--NThread=2 --NoRendering --PlgPath=Plugins/Server</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>--NThread=3 --NoRendering --PlgPath=Plugins/Server</LocalDebuggerCommandArguments>
     <LocalDebuggerWorkingDirectory>$(SOFT_ENGINE_HOME)/build/bin/Debug</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
 </Project>

@@ -5,10 +5,27 @@
       <UniqueIdentifier>{4FC737F1-C7A5-4376-A066-2A32D752A2FF}</UniqueIdentifier>
       <Extensions>cpp;c;cc;cxx;c++;cppm;ixx;def;odl;idl;hpj;bat;asm;asmx</Extensions>
     </Filter>
+    <Filter Include="Source Files\Synch">
+      <UniqueIdentifier>{092f6290-22ea-4266-9e43-5e13c73f9cf9}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="Global.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="GameRoom.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Synch\Package.h">
+      <Filter>Source Files\Synch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Synch\ByteStream.h">
+      <Filter>Source Files\Synch</Filter>
+    </ClInclude>
   </ItemGroup>
 </Project>

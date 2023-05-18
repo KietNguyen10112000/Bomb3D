@@ -11,6 +11,9 @@
     <Filter Include="Source Files\Renderers">
       <UniqueIdentifier>{7e25eeb2-96ce-471b-9f8f-bb0ca70044d6}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Synch">
+      <UniqueIdentifier>{266a358a-99be-426f-8a1c-6d05dad35a52}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -32,6 +35,12 @@
     </ClInclude>
     <ClInclude Include="Global.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Synch\ByteStream.h">
+      <Filter>Source Files\Synch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Synch\Package.h">
+      <Filter>Source Files\Synch</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

@@ -11,7 +11,7 @@
 
 std::array<std::array<size_t, 32>, 32> g_mapValues = {};
 
-Global Global::s_instance = {};
+Global* Global::s_instance = {};
 
 void AddStaticObjects(Scene2D* scene)
 {
@@ -121,6 +121,7 @@ void AddDynamicObjects(Scene2D* scene)
 
 void Initialize(Engine* engine)
 {
+	Global::s_instance = new Global();
 	std::cout << "Hello, World!\n";
 
 	TCP_SOCKET_DESCRIPTION desc;
@@ -128,7 +129,18 @@ void Initialize(Engine* engine)
 	desc.port = 9023;
 	Global::Get().connector = new TCPConnector(desc);
 	Global::Get().connector->Connect();
-	Global::Get().connector->Send((byte*)"Hello from client!", 18);
+	auto& stream = Global::Get().sendStream;
+	stream.Put<String>("Hello from client!");
+	Global::Get().sender.SendSynch(stream, *Global::Get().connector);
+
+	for (size_t i = 0; i < 10; i++)
+	{
+		Thread::Sleep(3000);
+		stream.Clean();
+		stream.Put<String>(String::Format("Hello from client again {}", i));
+		Global::Get().sender.SendSynch(stream, *Global::Get().connector);
+	}
+	
 
 	Global::Get().gameLoop = new GameLoopHandler();
 	engine->SetIterationHandler(Global::Get().gameLoop);
@@ -154,5 +166,7 @@ void Finalize(Engine* engine)
 {
 	delete Global::Get().gameLoop;
 	delete Global::Get().connector;
+	delete Global::s_instance;
+
 	std::cout << "Bye!\n";
 }
