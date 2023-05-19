@@ -27,7 +27,7 @@ protected:
 public:
 #define BYTE_STREAM_ASSERT_NO_OVERFLOW(len) assert((m_cur + len <= m_end) && "ByteStream overflow");
 
-	inline String GetString()
+	inline const char* GetString()
 	{
 #ifdef _DEBUG
 		bool valid = false;
@@ -47,13 +47,13 @@ public:
 		}
 #endif // _DEBUG
 
-		String ret = (char*)m_cur;
-		m_cur += ret.length() + 1;
+		auto ret = (char*)m_cur;
+		m_cur += strlen(ret) + 1;
 		return ret;
 	}
 
 	template <typename T>
-	inline T Get()
+	inline auto Get()
 	{
 		static_assert(std::is_const_v<T> == false, "Can not get const value");
 
@@ -71,6 +71,40 @@ public:
 	}
 
 #undef BYTE_STREAM_ASSERT_NO_OVERFLOW
+
+	template <typename T>
+	inline void Skip()
+	{
+		static_assert(std::is_const_v<T> == false, "Can not skip const value");
+
+		if constexpr (
+			std::is_same_v<T, String>
+			|| std::is_same_v<T, char*>)
+		{
+			m_cur += strlen((char*)m_cur) + 1;
+			return;
+		}
+
+		BYTE_STREAM_ASSERT_NO_OVERFLOW(sizeof(T));
+		m_cur += sizeof(T);
+		return;
+	}
+
+	inline bool IsEmpty()
+	{
+		assert(m_cur <= m_end);
+		return m_cur == m_end;
+	}
+
+	inline size_t GetPayloadSize() const
+	{
+		return m_cur - m_begin - sizeof(uint32_t);
+	}
+
+	inline size_t GetSize() const
+	{
+		return m_cur - m_begin;
+	}
 };
 
 class ByteStream : public ByteStreamRead
@@ -109,7 +143,16 @@ protected:
 	}
 
 public:
-	ByteStream(size_t initSize = 1 * MB)
+	//ByteStream()
+	//{
+	//	GrowthBy(sizeof(uint32_t));
+
+	//	// put placeholder for package size
+	//	Put<uint32_t>(0);
+	//}
+
+	// must be called before put anything
+	inline void Initialize(size_t initSize)
 	{
 		GrowthBy(initSize + sizeof(uint32_t));
 
@@ -117,17 +160,20 @@ public:
 		Put<uint32_t>(0);
 	}
 
-	inline void PutString(size_t len, const char* str)
+	inline size_t PutString(size_t len, const char* str)
 	{
 		len++;
 		GrowthBy(len);
 		::memcpy(m_cur, str, len);
 		m_cur[len] = 0;
+
+		size_t ret = m_cur - m_begin;
 		m_cur += len;
+		return ret;
 	}
 
 	template <typename T>
-	inline void Put(const T& v)
+	inline auto Put(const T& v)
 	{
 		static_assert((!std::is_pointer_v<T>) || std::is_trivial_v<T> 
 			|| std::is_same_v<T, String> || std::is_same_v<T, char*>,
@@ -135,25 +181,44 @@ public:
 
 		if constexpr (std::is_same_v<T, String>)
 		{
-			PutString(v.length(), v.c_str());
-			return;
+			return PutString(v.length(), v.c_str());
 		}
 
 		if constexpr (std::is_same_v<T, char*>)
 		{
-			PutString(::strlen(v), v);
-			return;
+			return PutString(::strlen(v), v);
 		}
 
 		GrowthBy(sizeof(T));
 		auto p = (T*)m_cur;
+		auto ret = m_cur - m_begin;
 		m_cur += sizeof(T);
 		*p = v;
+		return ret;
 	}
 
 	inline void Clean()
 	{
 		m_cur = m_begin;
 		Put<uint32_t>(0);
+	}
+
+	template <typename T>
+	inline void Set(size_t idx, const T& v)
+	{
+		auto p = (T*)&m_begin[idx];
+		*p = v;
+	}
+
+	inline void Merge(ByteStream& another)
+	{
+		auto growthSize = another.m_cur - another.m_begin - sizeof(uint32_t);
+
+		if (growthSize == 0) return;
+
+		GrowthBy(growthSize);
+
+		memcpy(m_cur, another.m_begin + sizeof(uint32_t), growthSize);
+		m_cur += growthSize;
 	}
 };

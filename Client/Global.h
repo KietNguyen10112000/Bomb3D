@@ -3,6 +3,7 @@
 #include "Network/TCPConnector.h"
 
 #include "Synch/Package.h"
+#include "Synch/Action.h"
 
 using namespace soft;
 
@@ -21,6 +22,16 @@ struct Global
 	GameLoopHandler* gameLoop = nullptr;
 
 	TCPConnector*		connector;
-	PackageSender		sender;
-	ByteStream			sendStream;
+	
+	uint32_t actionCount = 0;
+	ByteStream* actionStream;
+
+	size_t userId = 0;
+
+	inline void ExecuteAction(Action* action)
+	{
+		actionCount++;
+		actionStream->Put<ActionID>(action->GetActionID());
+		action->Serialize(*actionStream);
+	}
 };

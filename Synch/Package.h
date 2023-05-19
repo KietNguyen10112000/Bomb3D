@@ -67,6 +67,10 @@ public:
 		{
 			return PACKAGE_EMPTY;
 		}
+		else if (ret < 0)
+		{
+			return CONNECTION_ERROR;
+		}
 
 		if (m_pkgSize > Package::MAX_LEN)
 		{
@@ -106,7 +110,7 @@ public:
 	inline ByteStreamRead GetStream() const
 	{
 		ByteStreamRead read;
-		read.Initialize((byte*)m_buffer.data(), m_pkgSize);
+		read.Initialize((byte*)m_buffer.data() /*+ sizeof(uint32_t)*/, m_pkgSize);
 		return read;
 	}
 };

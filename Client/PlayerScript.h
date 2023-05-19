@@ -14,6 +14,11 @@
 
 #include "BulletScript.h"
 
+#include "GameActions/UserInputAction.h"
+
+#include "Global.h"
+#include "GameLoopHandler.h"
+
 using namespace soft;
 
 class PlayerScript : Traceable<PlayerScript>, public Script2D
@@ -39,6 +44,10 @@ protected:
 	SharedPtr<RectCollider>			m_bulletCollider;
 
 public:
+	UserInputAction m_inputAction;
+	UserInput* m_input;
+	ID m_userId = 0;
+
 	float m_speed = 300;
 	float m_rotationSpeed = 100;
 	float m_recoil = 0;
@@ -48,8 +57,39 @@ public:
 	float m_gunRecoilLen = 15;
 	bool m_enableMouse = false;
 
+	inline void RecordInputAction()
+	{
+		m_input->SetKeyUp('W');
+		m_input->SetKeyUp('A');
+		m_input->SetKeyUp('S');
+		m_input->SetKeyUp('D');
+
+		if (Input()->IsKeyDown('W'))
+		{
+			m_input->SetKeyDown('W');
+		}
+
+		if (Input()->IsKeyDown('S'))
+		{
+			m_input->SetKeyDown('S');
+		}
+
+		if (Input()->IsKeyDown('A'))
+		{
+			m_input->SetKeyDown('A');
+		}
+
+		if (Input()->IsKeyDown('D'))
+		{
+			m_input->SetKeyDown('D');
+		}
+	}
+
 	virtual void OnStart() override
 	{
+		m_input = &Global::Get().gameLoop->m_userInput[m_userId];
+		m_inputAction.SetUserId(m_userId, m_input);
+
 		m_renderer = GetObject()->GetComponent<SpritesRenderer>();
 		m_cam = GetObject()->Child(0)->GetComponent<Camera2D>();
 		m_gun = GetObject()->Child(2);
@@ -65,28 +105,32 @@ public:
 
 	virtual void OnUpdate(float dt) override
 	{
+		m_input->Roll();
+		if (m_userId == Global::Get().userId)
+			RecordInputAction();
+
 		Vec2 motion = { 0,0 };
 		m_renderer->SetSprite(0);
 
-		if (Input()->IsKeyDown('W'))
+		if (m_input->IsKeyDown('W'))
 		{
 			motion.y -= 1;
 			m_renderer->SetSprite(1);
 		}
 
-		if (Input()->IsKeyDown('S'))
+		if (m_input->IsKeyDown('S'))
 		{
 			motion.y += 1;
 			m_renderer->SetSprite(2);
 		}
 
-		if (Input()->IsKeyDown('A'))
+		if (m_input->IsKeyDown('A'))
 		{
 			motion.x -= 1;
 			m_renderer->SetSprite(3);
 		}
 
-		if (Input()->IsKeyDown('D'))
+		if (m_input->IsKeyDown('D'))
 		{
 			motion.x += 1;
 			m_renderer->SetSprite(4);
@@ -136,6 +180,13 @@ public:
 			m_redLine->Scale().x = len;
 
 			m_crossHair->Position() = center - position;
+
+			m_input->SetRotation(rotation);
+		}
+
+		if (m_userId == Global::Get().userId)
+		{
+			Global::Get().ExecuteAction(&m_inputAction);
 		}
 	}
 

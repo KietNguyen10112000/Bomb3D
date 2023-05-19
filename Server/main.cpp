@@ -9,6 +9,8 @@
 
 #include "Global.h"
 
+#include "GameActions/GameActions.h"
+
 void InitConsole(Engine* engine)
 {
 #ifdef SERVER_REPL
@@ -115,6 +117,7 @@ class ServerLoopHandler : public IterationHandler
 
 			if (room.clientsCount == 1)
 			{
+				room.StartUp();
 				room.id = 0;
 				Global::Get().gameRoomCount++;
 			}
@@ -134,6 +137,8 @@ class ServerLoopHandler : public IterationHandler
 
 void Initialize(Engine* engine)
 {
+	GameActions::InitializeAllGameActions();
+
 	Global::s_instance = new Global();
 	Global::Get().serverLoop = new ServerLoopHandler();
 	engine->SetIterationHandler(Global::Get().serverLoop);

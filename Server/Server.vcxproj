@@ -141,9 +141,13 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\GameActions\UserInputAction.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\GameActions\GameActions.h" />
+    <ClInclude Include="..\GameActions\UserInputAction.h" />
+    <ClInclude Include="..\Synch\Action.h" />
     <ClInclude Include="..\Synch\ByteStream.h" />
     <ClInclude Include="..\Synch\Package.h" />
     <ClInclude Include="GameRoom.h" />

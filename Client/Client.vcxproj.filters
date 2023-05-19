@@ -14,10 +14,16 @@
     <Filter Include="Source Files\Synch">
       <UniqueIdentifier>{266a358a-99be-426f-8a1c-6d05dad35a52}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\GameActions">
+      <UniqueIdentifier>{a69414f8-3c7b-46bb-baf9-a513697154cd}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GameActions\UserInputAction.cpp">
+      <Filter>Source Files\GameActions</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -41,6 +47,12 @@
     </ClInclude>
     <ClInclude Include="..\Synch\Package.h">
       <Filter>Source Files\Synch</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GameActions\GameActions.h">
+      <Filter>Source Files\GameActions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GameActions\UserInputAction.h">
+      <Filter>Source Files\GameActions</Filter>
     </ClInclude>
   </ItemGroup>
 </Project>

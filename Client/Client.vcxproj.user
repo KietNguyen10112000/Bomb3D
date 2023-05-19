@@ -4,6 +4,6 @@
     <LocalDebuggerCommand>$(SOFT_ENGINE_HOME)/build/bin/Debug/Engine.exe</LocalDebuggerCommand>
     <LocalDebuggerWorkingDirectory>$(SOFT_ENGINE_HOME)/build/bin/Debug</LocalDebuggerWorkingDirectory>
     <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
-    <LocalDebuggerCommandArguments>--NThread=2 --PlgPath=Plugins/Client</LocalDebuggerCommandArguments>
+    <LocalDebuggerCommandArguments>--NThread=3 --PlgPath=Plugins/Client</LocalDebuggerCommandArguments>
   </PropertyGroup>
 </Project>
