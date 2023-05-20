@@ -124,6 +124,11 @@ public:
 		CONNECTION_ERROR
 	};
 
+	inline void Pack(ByteStream& stream)
+	{
+		stream.PackSize();
+	}
+
 	inline int SendSynch(ByteStream& stream, TCPConnector& conn)
 	{
 		auto size = stream.PackSize();

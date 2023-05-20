@@ -108,7 +108,7 @@
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_CLIENT;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalIncludeDirectories>$(SOFT_ENGINE_HOME);$(SOFT_ENGINE_HOME)/Engine;$(SOFT_ENGINE_HOME)/Libraries;$(SOFT_ENGINE_HOME)/Libraries/glm;$(SOFT_ENGINE_HOME)/Engine/Modules;$(SOFT_ENGINE_HOME)/Libraries/SFML/SFML-2.5.1/include;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -126,7 +126,7 @@
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_CRT_SECURE_NO_WARNINGS;_CLIENT;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
       <AdditionalIncludeDirectories>$(SOFT_ENGINE_HOME);$(SOFT_ENGINE_HOME)/Engine;$(SOFT_ENGINE_HOME)/Libraries;$(SOFT_ENGINE_HOME)/Libraries/glm;$(SOFT_ENGINE_HOME)/Engine/Modules;$(SOFT_ENGINE_HOME)/Libraries/SFML/SFML-2.5.1/include;$(SolutionDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
@@ -141,19 +141,28 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="..\GameActions\GameActionConfig.cpp" />
+    <ClCompile Include="..\GameActions\MatchStartAction.cpp" />
     <ClCompile Include="..\GameActions\UserInputAction.cpp" />
+    <ClCompile Include="GameInit.cpp" />
     <ClCompile Include="main.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\GameActions\GameActionConfig.h" />
     <ClInclude Include="..\GameActions\GameActions.h" />
+    <ClInclude Include="..\GameActions\MatchStartAction.h" />
     <ClInclude Include="..\GameActions\UserInputAction.h" />
     <ClInclude Include="..\Synch\ByteStream.h" />
     <ClInclude Include="..\Synch\Package.h" />
     <ClInclude Include="BulletScript.h" />
+    <ClInclude Include="GameInit.h" />
     <ClInclude Include="Global.h" />
     <ClInclude Include="GameLoopHandler.h" />
     <ClInclude Include="MapRenderer.h" />
     <ClInclude Include="PlayerScript.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="..\DebugView.natvis" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

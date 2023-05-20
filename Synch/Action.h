@@ -9,7 +9,7 @@
 class Action;
 
 using ActionInitializer		= Action* (*)();
-using ActionFinalizer		= void (*)(Action*&);
+using ActionFinalizer		= void (*)(Action*);
 
 using ActionID = uint32_t;
 

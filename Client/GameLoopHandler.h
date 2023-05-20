@@ -1,13 +1,19 @@
 #pragma once
 
 #include "Engine/Engine.h"
+#include "Engine/ENGINE_EVENT.h"
 #include "Objects2D/Scene2D/Scene2D.h"
 
 #include "Global.h"
 
 #include "Synch/Action.h"
 
+#include "GameActions/GameActions.h"
 #include "GameActions/UserInputAction.h"
+#include "GameActions/GameActionConfig.h"
+#include "GameActions/MatchStartAction.h"
+
+#include "GameInit.h"
 
 using namespace soft;
 
@@ -15,9 +21,9 @@ class GameLoopHandler : public IterationHandler
 {
 	constexpr static size_t NUM_STREAM = 32;
 
-	constexpr static size_t MAX_DELAY_ITERATION = 32;
+	constexpr static size_t MAX_DELAY_ITERATION = 4;
 
-	constexpr static size_t NUM_ITERATION_PER_SEND = 4;
+	constexpr static size_t NUM_ITERATION_PER_SEND = GameActionConfig::ClientConfig::NUM_TICKS_PER_SYNCH;
 
 	struct ActionSynch
 	{
@@ -50,6 +56,7 @@ class GameLoopHandler : public IterationHandler
 
 	bool							m_isTransportRunning = true;
 	bool							m_isReachedEndOfTransport = false;
+	bool							m_isMatchedSuccess = false;
 
 public:
 	UserInput m_userInput[10];
@@ -110,6 +117,7 @@ private:
 			{
 				m_actionSynch.action->Activate(scene);
 				ActionCreator::Delete(m_actionSynch.action);
+				m_actionSynch.action = nullptr;
 			}
 			else
 			{
@@ -199,7 +207,7 @@ public:
 				{
 					auto iteration = serverStream.Get<size_t>();
 					auto numAction = serverStream.Get<uint32_t>();
-					//std::cout << "Recv " << numAction << "\n";
+					//std::cout << "Recv iteration " << iteration << "\n";
 					for (size_t i = 0; i < numAction; i++)
 					{
 						ActionID aId = serverStream.Get<ActionID>();
@@ -207,6 +215,8 @@ public:
 						action->Deserialize(serverStream);
 						m_recvActions.enqueue({ action, iteration });
 					}
+
+					assert(m_maxIteration < iteration);
 					m_maxIteration = iteration;
 				}
 			}
@@ -222,7 +232,88 @@ public:
 		m_isReachedEndOfTransport = true;
 	}
 
-	inline void StartUp()
+	inline void WaitForMatchStart(Engine* engine)
+	{
+		std::cout << "Wait for match start...\n";
+		while (true)
+		{
+			if (!m_recvActions.try_dequeue(m_actionSynch))
+			{
+				Thread::Sleep(16);
+				continue;
+			}
+
+			assert(m_actionSynch.action->GetActionID() == GameActions::ACTION_ID::MATCH_START);
+
+			engine->AddListener(ENGINE_EVENT::SCENE_ON_SETUP,
+				[](int argc, void** argv, void* a)
+				{
+					MatchStartAction* matchStart = (MatchStartAction*)a;
+					AddStaticObjects((Scene2D*)argv[1], 
+						matchStart->m_map, matchStart->m_width, matchStart->m_height,
+						matchStart->m_blockCellValues, matchStart->m_numBlockCell);
+				},
+				m_actionSynch.action
+			);
+
+			engine->AddListener(ENGINE_EVENT::SCENE_ON_START,
+				[](int argc, void** argv, void* a)
+				{
+					auto scene = (Scene2D*)argv[1];
+					MatchStartAction* matchStart = (MatchStartAction*)a;
+
+					String ownIP = Global::Get().connector->GetAddressString();
+					std::cout << "Player address: " << ownIP << "\n";
+
+					auto& clients = matchStart->m_clientInfo;
+					auto clientCount = matchStart->m_numClient;
+					for (size_t i = 0; i < clientCount; i++)
+					{
+						auto& client = clients[i];
+						if (ownIP == client.ipAddr)
+						{
+							std::cout << "Player id: " << client.id << "\n";
+							Global::Get().userId = client.id;
+						}
+					}
+
+					for (size_t i = 0; i < clientCount; i++)
+					{
+						auto& client = clients[i];
+						AddPlayer(scene, client.id, client.pos, matchStart->m_width, matchStart->m_height);
+					}
+					
+					AddMapRenderer(scene, matchStart->m_map, matchStart->m_width, matchStart->m_height);
+
+					// response for server know we're ready for game
+					auto& sender = Global::Get().gameLoop->m_sender;
+					auto& stream = Global::Get().gameLoop->m_sendStreams[0];
+					stream.Clean();
+
+					// iteration count
+					stream.Put<size_t>(0);
+					// num actions
+					stream.Put<uint32_t>(1);
+					// action
+					stream.Put<ActionID>(matchStart->GetActionID());
+					matchStart->Clear();
+					matchStart->SetUserId(Global::Get().userId);
+					matchStart->Serialize(stream);
+
+					sender.SendSynch(stream, *Global::Get().connector);
+					stream.Clean();
+
+					ActionCreator::Delete(matchStart);
+				},
+				m_actionSynch.action
+			);
+			
+			m_actionSynch.action = nullptr;
+			break;
+		}
+	}
+
+	inline void StartUp(Engine* engine)
 	{
 		for (auto& stream : m_sendStreams)
 		{
@@ -239,6 +330,10 @@ public:
 		TaskSystem::Submit(task, Task::CRITICAL);
 
 		m_sendStreamsLock[m_curSendStreamIdx].lock_no_check_own_thread();
+
+		WaitForMatchStart(engine);
+		m_maxIteration = 0;
+		m_iterationCount = 0;
 	}
 
 	// Inherited via IterationHandler
@@ -250,11 +345,13 @@ public:
 
 		assert(m_maxIteration >= m_iterationCount);
 
-		if (m_maxIteration != m_iterationCount)
+		auto maxIteration = m_maxIteration;
+
+		if (maxIteration != m_iterationCount)
 		{
-			if (m_maxIteration - m_iterationCount > MAX_DELAY_ITERATION)
+			if (maxIteration - m_iterationCount > MAX_DELAY_ITERATION)
 			{
-				auto loopCount = m_maxIteration - m_iterationCount - MAX_DELAY_ITERATION;
+				auto loopCount = maxIteration - m_iterationCount - MAX_DELAY_ITERATION;
 				for (size_t i = 0; i < loopCount; i++)
 				{
 					FixedIteration(fixedDt, scene);
@@ -264,7 +361,7 @@ public:
 
 		while (sumDt > fixedDt)
 		{
-			if (m_maxIteration != m_iterationCount)
+			if (maxIteration != m_iterationCount)
 			{
 				FixedIteration(fixedDt, scene);
 			}
@@ -280,4 +377,11 @@ public:
 
 		return sumDt;
 	}
+
+public:
+	inline void OnRecvMatchStart(MatchStartAction& match)
+	{
+		m_isMatchedSuccess = true;
+	}
+
 };

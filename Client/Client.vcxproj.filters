@@ -17,6 +17,9 @@
     <Filter Include="Source Files\GameActions">
       <UniqueIdentifier>{a69414f8-3c7b-46bb-baf9-a513697154cd}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Natvis">
+      <UniqueIdentifier>{8023b4be-7f20-461a-9ee5-15a177ac5937}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -24,6 +27,15 @@
     </ClCompile>
     <ClCompile Include="..\GameActions\UserInputAction.cpp">
       <Filter>Source Files\GameActions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GameActions\GameActionConfig.cpp">
+      <Filter>Source Files\GameActions</Filter>
+    </ClCompile>
+    <ClCompile Include="..\GameActions\MatchStartAction.cpp">
+      <Filter>Source Files\GameActions</Filter>
+    </ClCompile>
+    <ClCompile Include="GameInit.cpp">
+      <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -54,5 +66,19 @@
     <ClInclude Include="..\GameActions\UserInputAction.h">
       <Filter>Source Files\GameActions</Filter>
     </ClInclude>
+    <ClInclude Include="..\GameActions\GameActionConfig.h">
+      <Filter>Source Files\GameActions</Filter>
+    </ClInclude>
+    <ClInclude Include="..\GameActions\MatchStartAction.h">
+      <Filter>Source Files\GameActions</Filter>
+    </ClInclude>
+    <ClInclude Include="GameInit.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+  </ItemGroup>
+  <ItemGroup>
+    <Natvis Include="..\DebugView.natvis">
+      <Filter>Natvis</Filter>
+    </Natvis>
   </ItemGroup>
 </Project>

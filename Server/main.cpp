@@ -77,7 +77,22 @@ Global* Global::s_instance = nullptr;
 
 inline auto& GetCurrentMatchingRoom()
 {
-	return Global::Get().gameRoom[Global::Get().gameRoomCount];
+	return Global::Get().gameRoom[Global::Get().gameRoomIdx];
+}
+
+inline auto NextRoomIdx()
+{
+	Global::Get().gameRoomIdx++;
+	for (size_t i = 0; i < Global::MAX_ROOMS; i++)
+	{
+		auto idx = (i + Global::Get().gameRoomIdx) % Global::MAX_ROOMS;
+
+		if (Global::Get().gameRoom[idx].m_id == INVALID_ID)
+		{
+			Global::Get().gameRoomIdx = idx;
+			break;
+		}
+	}
 }
 
 class ServerLoopHandler : public IterationHandler
@@ -85,10 +100,10 @@ class ServerLoopHandler : public IterationHandler
 	inline void UpdateAllRoom()
 	{
 		auto fixedDt = Global::Get().fixedDt;
-		for (size_t i = 0; i < Global::Get().gameRoomCount; i++)
+		for (size_t i = 0; i < Global::MAX_ROOMS; i++)
 		{
 			auto& room = Global::Get().gameRoom[i];
-			if (room.id == INVALID_ID)
+			if (room.m_id == INVALID_ID)
 			{
 				continue;
 			}
@@ -105,21 +120,21 @@ class ServerLoopHandler : public IterationHandler
 #endif // SERVER_REPL
 
 		auto& room = GetCurrentMatchingRoom();
-		auto& conn = room.GetClientConn(room.clientsCount);
+		auto& conn = room.GetClientConn(room.m_clientsCount);
 		auto ret = Global::Get().acceptor.Accept(conn);
 
 		if (ret == 0)
 		{
-			room.InitializeClient(room.clientsCount);
+			room.InitializeClient(room.m_clientsCount);
 			conn.SetBlockingMode(false);
 			std::cout << "Client connected\n";
-			room.clientsCount++;
+			room.m_clientsCount++;
 
-			if (room.clientsCount == 1)
+			if (room.m_clientsCount == 2)
 			{
+				room.m_id = Global::Get().gameRoomIdx;
 				room.StartUp();
-				room.id = 0;
-				Global::Get().gameRoomCount++;
+				NextRoomIdx();
 			}
 		}
 

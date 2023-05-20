@@ -6,4 +6,10 @@
     <LocalDebuggerCommandArguments>--NThread=3 --NoRendering --PlgPath=Plugins/Server</LocalDebuggerCommandArguments>
     <LocalDebuggerWorkingDirectory>$(SOFT_ENGINE_HOME)/build/bin/Debug</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <LocalDebuggerCommandArguments>--NThread=3 --NoRendering --PlgPath=Plugins/Server</LocalDebuggerCommandArguments>
+    <DebuggerFlavor>WindowsLocalDebugger</DebuggerFlavor>
+    <LocalDebuggerCommand>$(SOFT_ENGINE_HOME)/build/bin/Release/Engine.exe</LocalDebuggerCommand>
+    <LocalDebuggerWorkingDirectory>$(SOFT_ENGINE_HOME)/build/bin/Release</LocalDebuggerWorkingDirectory>
+  </PropertyGroup>
 </Project>

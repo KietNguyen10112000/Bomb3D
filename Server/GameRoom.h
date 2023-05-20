@@ -1,70 +1,125 @@
 #pragma once
 
+#include "Core/Time/Clock.h"
+
 #include "Network/TCPAcceptor.h"
 #include "Network/TCPConnector.h"
 
 #include "Synch/Package.h"
 #include "Synch/Action.h"
 
+#include "GameActions/GameActions.h"
+#include "GameActions/GameActionConfig.h"
+
+#include "GameMgr.h"
+
 struct Client
 {
 	TCPConnector			conn;
 	PackageReceiver			receiver;
+	bool					matched = false;
 };
 
-struct GameRoom
+class GameRoom
 {
-	constexpr static size_t MAX_CLIENTS				= 10;
+public:
+	constexpr static size_t MAX_CLIENTS					= 10;
 
-	constexpr static size_t NUM_TICKS_PER_SEND		= 4;
+	constexpr static size_t NUM_TICKS_PER_SEND			= GameActionConfig::ServerConfig::NUM_TICKS_PER_SYNCH;
 
-	size_t					id						= INVALID_ID;
-	size_t					iterationCount			= 0;
+	constexpr static size_t NUM_BUFFERED_TICKS			= GameActionConfig::ServerConfig::NUM_TICKS_PER_SYNCH * 5;
 
-	Client					clients[MAX_CLIENTS]	= {};
-	size_t					clientsCount			= 0;
+	constexpr static size_t NUM_STREAMS					= NUM_TICKS_PER_SEND + NUM_BUFFERED_TICKS;
 
-	PackageSender			sender;
-	ByteStream				sendPkg;
-	ByteStream				iterationStreams	[NUM_TICKS_PER_SEND];
+	constexpr static size_t NUM_BUFFERED_SEND_PKG		= 32;
 
-	uint32_t				actionsCount		[NUM_TICKS_PER_SEND];
-	size_t					actionsCountPkgIdx	[NUM_TICKS_PER_SEND];
+	size_t					m_id						= INVALID_ID;
+	size_t					m_iterationCount			= 0;
+	size_t					m_lastSynchIteration		= 0;
+
+	Client					m_clients[MAX_CLIENTS]		= {};
+	size_t					m_clientsCount				= 0;
+
+	PackageSender			m_sender;
+	ByteStream				m_sendPkg					;
+	//Spinlock				m_sendLocks					[MAX_CLIENTS];
+
+	ByteStream				m_iterationStreams			[NUM_STREAMS];
+	uint32_t				m_actionsCount				[NUM_STREAMS];
+	size_t					m_actionsCountPkgIdx		[NUM_STREAMS];
+	size_t					m_iterationStreamStartIdx	= 0;
+
+	ConcurrentQueue<Action*>	m_internalActions;
+
+	GameMgr					m_gameMgr;
+
+	size_t					m_matchedClient				= 0;
+	bool					m_isInitOnce				= false;
+	bool					m_isMatchedSuccess			= false;
+
+	inline void FirstResetIterationStreams()
+	{
+		auto iter = m_iterationCount;
+		size_t i = 0;
+		for (auto& stream : m_iterationStreams)
+		{
+			stream.Clean();
+			stream.Put<size_t>(++iter);
+			m_actionsCountPkgIdx[i] = stream.Put<uint32_t>(0);
+			m_actionsCount[i] = 0;
+			i++;
+
+			//std::cout << "Prepare stream " << iter << " \n";
+		}
+
+		m_iterationStreamStartIdx = 0;
+		m_lastSynchIteration = m_iterationCount + 1;
+	}
 
 	inline void ResetIterationStreams()
 	{
-		size_t i = 0;
-		auto iter = iterationCount;
-		for (auto& stream : iterationStreams)
+		auto iter = m_iterationCount + NUM_BUFFERED_TICKS;
+		for (size_t j = 0; j < NUM_TICKS_PER_SEND; j++)
 		{
+			auto idx = j + m_iterationStreamStartIdx;
+			auto& stream = m_iterationStreams[idx];
 			stream.Clean();
-			stream.Put<size_t>(iter++);
-			actionsCountPkgIdx[i] = stream.Put<uint32_t>(0);
-			actionsCount[i] = 0;
-			i++;
+			stream.Put<size_t>(++iter);
+			m_actionsCountPkgIdx[idx] = stream.Put<uint32_t>(0);
+			m_actionsCount[idx] = 0;
+
+			//std::cout << "Prepare stream " << iter << " \n";
 		}
+
+		m_iterationStreamStartIdx = (m_iterationStreamStartIdx + NUM_TICKS_PER_SEND) % NUM_STREAMS;
+		m_lastSynchIteration = m_iterationCount + 1;
 	}
 
 	inline void SynchAllClients()
 	{
-		sendPkg.Clean();
+		m_sendPkg.Clean();
 
 		for (size_t i = 0; i < NUM_TICKS_PER_SEND; i++)
 		{
-			iterationStreams[i].Set<uint32_t>(actionsCountPkgIdx[i], actionsCount[i]);
+			auto idx = i + m_iterationStreamStartIdx;
+			m_iterationStreams[idx].Set<uint32_t>(m_actionsCountPkgIdx[idx], m_actionsCount[idx]);
 			//std::cout << "Tick " << i << ", num actions: " << actionsCount[i] << '\n';
 		}
 
-		for (auto& stream : iterationStreams)
+		for (size_t i = 0; i < NUM_TICKS_PER_SEND; i++)
+		{
+			m_sendPkg.Merge(m_iterationStreams[i + m_iterationStreamStartIdx]);
+		}
+		/*for (auto& stream : iterationStreams)
 		{
 			sendPkg.Merge(stream);
-		}
+		}*/
 
-		for (auto& client : clients)
+		for (auto& client : m_clients)
 		{
 			if (!client.conn.IsDisconnected())
 			{
-				sender.SendSynch(sendPkg, client.conn);
+				m_sender.SendSynch(m_sendPkg, client.conn);
 			}
 		}
 
@@ -74,6 +129,11 @@ struct GameRoom
 	// check if user send a valid action
 	inline bool IsActionValid(ID userId, Action* action)
 	{
+		if (action->GetActionID() == GameActions::ACTION_ID::MATCH_START)
+		{
+			action->Activate(nullptr);
+		}
+
 		return true;
 	}
 
@@ -98,21 +158,26 @@ struct GameRoom
 				assert(minIteration <= clientIteration);
 			}
 
-			if (clientIteration <= iterationCount)
+			if (clientIteration <= m_iterationCount)
 			{
 				int x = 3;
-				assert(clientIteration <= iterationCount);
+				assert(clientIteration <= m_iterationCount);
 			}
 #endif // _DEBUG
 
-			
+			auto offsetIteration = clientIteration - minIteration;
 
-			auto serverActivateIteration = iterationCount; //+ (clientIteration - minIteration);
+			if (offsetIteration >= NUM_BUFFERED_TICKS)
+			{
+				std::cout << offsetIteration << '\n';
+			}
 
-			auto streamIdx = 0;//serverActivateIteration % NUM_TICKS_PER_SEND;
+			//auto serverActivateIteration = lastSynchIteration + offsetIteration;
 
-			auto& sendStream = iterationStreams[streamIdx];
-			uint32_t& validAction = actionsCount[streamIdx];
+			auto streamIdx = (m_iterationStreamStartIdx + offsetIteration) % NUM_STREAMS;
+
+			auto& sendStream = m_iterationStreams[streamIdx];
+			uint32_t& validAction = m_actionsCount[streamIdx];
 
 			//std::cout << "Recv " << actionCount << " actions\n";
 
@@ -134,16 +199,12 @@ struct GameRoom
 		}
 	}
 
-	inline void FixedIteration(float dt)
+	inline void ProcessAllClients()
 	{
-		iterationCount++;
+		ConsumeActions();
 
-		if (iterationCount % NUM_TICKS_PER_SEND == 0)
-		{
-			SynchAllClients();
-		}
-
-		for (auto& client : clients)
+		size_t disconnectedClient = 0;
+		for (auto& client : m_clients)
 		{
 			if (!client.conn.IsDisconnected())
 			{
@@ -160,27 +221,170 @@ struct GameRoom
 					client.conn.Disconnect();
 				}
 			}
+			else
+			{
+				disconnectedClient++;
+			}
 		}
+
+		if (disconnectedClient == m_clientsCount)
+		{
+			Abort();
+		}
+	}
+
+	inline void ConsumeActions()
+	{
+		Action* action;
+		auto offsetIteration = m_iterationCount - m_lastSynchIteration;
+		auto streamIdx = (m_iterationStreamStartIdx + offsetIteration) % NUM_STREAMS;
+		auto& sendStream = m_iterationStreams[streamIdx];
+		uint32_t& validAction = m_actionsCount[streamIdx];
+
+		while (true)
+		{
+			if (!m_internalActions.try_dequeue(action))
+			{
+				break;
+			}
+
+			sendStream.Put<ActionID>(action->GetActionID());
+			action->Serialize(sendStream);
+			validAction++;
+
+			ActionCreator::Delete(action);
+		}
+	}
+
+	inline void FixedIteration(float dt)
+	{
+		if (!m_isMatchedSuccess)
+		{
+			ProcessAllClients();
+			return;
+		}
+
+		m_iterationCount++;
+
+		if (m_iterationCount % NUM_TICKS_PER_SEND == 0)
+		{
+			SynchAllClients();
+		}
+
+		Update(dt);
+		ProcessAllClients();
+	}
+
+	inline void SendMatchStartAction()
+	{
+		MatchStartAction* matchStart = (MatchStartAction*)ActionCreator::New(GameActions::ACTION_ID::MATCH_START);
+
+		matchStart->m_numClient = m_clientsCount;
+		matchStart->m_roomID = m_id;
+
+		m_gameMgr.GenerateMap(
+			matchStart->m_map, matchStart->m_width, matchStart->m_height,
+			matchStart->m_blockCellValues, matchStart->m_numBlockCell);
+
+		for (size_t i = 0; i < m_clientsCount; i++)
+		{
+			auto& clientInfo = matchStart->m_clientInfo[i];
+			auto& client	 = m_clients[i];
+
+			clientInfo.id = i;
+			clientInfo.ipAddr = client.conn.GetPeerAddressString();
+			m_gameMgr.SetPlayerPos(i, clientInfo.pos);
+
+			std::cout << "Send start for client " << clientInfo.ipAddr << "\n";
+		}
+
+		auto& stream = m_iterationStreams[0];
+		stream.Clean();
+		stream.Put<size_t>(1);
+		stream.Put<uint32_t>(1);
+		stream.Put<ActionID>(matchStart->GetActionID());
+		matchStart->Serialize(stream);
+
+		for (auto& client : m_clients)
+		{
+			m_sender.SendSynch(stream, client.conn);
+		}
+
+		ActionCreator::Delete(matchStart);
 	}
 
 	inline void StartUp()
 	{
-		sendPkg.Initialize(Package::MAX_LEN);
-		for (auto& stream : iterationStreams)
+		if (m_isInitOnce == false)
 		{
-			stream.Initialize(64 * KB);
+			m_sendPkg.Initialize(Package::MAX_LEN);
+			for (auto& stream : m_iterationStreams)
+			{
+				stream.Initialize(64 * KB);
+			}
+			m_isInitOnce = true;
 		}
+		else
+		{
+			m_sendPkg.Clean();
+			for (auto& stream : m_iterationStreams)
+			{
+				stream.Clean();
+			}
+		}
+		
+		SendMatchStartAction();
+		FirstResetIterationStreams();
+		m_iterationCount++;
+	}
 
-		ResetIterationStreams();
+	inline void Abort()
+	{
+		m_id = INVALID_ID;
+		m_iterationCount = 0;
+		m_clientsCount = 0;
+		m_iterationStreamStartIdx = 0;
+		m_matchedClient = 0;
+		m_isMatchedSuccess = false;
+		
+		for (auto& client : m_clients)
+		{
+			client.matched = false;
+		}
 	}
 
 	inline auto& GetClientConn(size_t id)
 	{
-		return clients[id].conn;
+		return m_clients[id].conn;
 	}
 
 	inline void InitializeClient(size_t id)
 	{
-		clients[id].receiver.Initialize();
+		m_clients[id].receiver.Initialize();
 	}
+
+	// thread-safe method
+	inline void ExecuteAction(Action* action)
+	{
+		m_internalActions.enqueue(action);
+	}
+
+	inline void OnClientMatchedSuccess(ID clientId)
+	{
+		if (m_clients[clientId].matched == false)
+		{
+			m_clients[clientId].matched == true;
+			m_matchedClient++;
+		}
+		
+		if (m_matchedClient == m_clientsCount)
+		{
+			m_isMatchedSuccess = true;
+		}
+	}
+
+public:
+	inline virtual void Update(float dt) {};
+
+	static GameRoom* GetRoom(size_t id);
 };

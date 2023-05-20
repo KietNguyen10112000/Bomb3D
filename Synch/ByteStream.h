@@ -53,7 +53,7 @@ public:
 	}
 
 	template <typename T>
-	inline auto Get()
+	inline T Get()
 	{
 		static_assert(std::is_const_v<T> == false, "Can not get const value");
 
@@ -70,7 +70,11 @@ public:
 		return *p;
 	}
 
-#undef BYTE_STREAM_ASSERT_NO_OVERFLOW
+	template <typename T>
+	inline void Pick(T& output)
+	{
+		output = Get<T>();
+	}
 
 	template <typename T>
 	inline void Skip()
@@ -89,6 +93,42 @@ public:
 		m_cur += sizeof(T);
 		return;
 	}
+
+	// return false if bufferSize is not enough
+	template <typename T>
+	inline bool GetArray(T* buffer, uint32_t bufferSize, uint32_t& outputSize)
+	{
+		auto savedCur = m_cur;
+		auto count = Get<uint32_t>();
+
+		if (count > bufferSize)
+		{
+			m_cur = savedCur;
+			return false;
+		}
+
+		for (uint32_t i = 0; i < count; i++)
+		{
+			buffer[i] = Get<T>();
+		}
+		outputSize = count;
+
+		return true;
+	}
+
+	template <typename Vec>
+	inline void GetSTLVector(Vec& output)
+	{
+		using T = typename std::decay<decltype(*output.begin())>::type;
+
+		auto count = Get<uint32_t>();
+		for (uint32_t i = 0; i < count; i++)
+		{
+			output.push_back(Get<T>());
+		}
+	}
+
+#undef BYTE_STREAM_ASSERT_NO_OVERFLOW
 
 	inline bool IsEmpty()
 	{
@@ -129,15 +169,19 @@ protected:
 		m_end = m_begin + newSize;
 	}
 
-	inline void SetHeaderSize(uint32_t size)
+	inline bool SetHeaderSize(uint32_t size)
 	{
+		if (*(uint32_t*)m_begin != 0) return false;
+
 		*(uint32_t*)m_begin = size;
+		return true;
 	}
 
 	inline uint32_t PackSize()
 	{
 		auto size = m_cur - m_begin - sizeof(uint32_t);
-		SetHeaderSize(size);
+		assert(size != 0);
+		if (!SetHeaderSize(size)) return m_cur - m_begin;
 		Put<uint32_t>(size);
 		return m_cur - m_begin;
 	}
@@ -191,10 +235,31 @@ public:
 
 		GrowthBy(sizeof(T));
 		auto p = (T*)m_cur;
-		auto ret = m_cur - m_begin;
+		size_t ret = m_cur - m_begin;
 		m_cur += sizeof(T);
 		*p = v;
 		return ret;
+	}
+
+	// allowed up 4B elements
+	template <typename T>
+	inline auto PutArray(const T* arr, uint32_t count)
+	{
+		Put<uint32_t>(count);
+		for (uint32_t i = 0; i < count; i++)
+		{
+			Put<T>(arr[i]);
+		}
+	}
+
+	template <typename STLVector>
+	inline auto PutSTLVector(STLVector& iterable)
+	{
+		Put<uint32_t>(std::distance(iterable.begin(), iterable.end()));
+		for (auto& v : iterable)
+		{
+			Put(v);
+		}
 	}
 
 	inline void Clean()

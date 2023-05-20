@@ -26,7 +26,7 @@ struct Global
 	ServerLoopHandler*		serverLoop = nullptr;
 
 	GameRoom				gameRoom[MAX_ROOMS] = {};
-	size_t					gameRoomCount = 0;
+	size_t					gameRoomIdx = 0;
 
 	TCPAcceptor				acceptor;
 

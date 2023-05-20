@@ -29,6 +29,11 @@ struct UserInput
 		m_curKey[keyCode] = false;
 	}
 
+	inline void SetKey(byte keyCode, bool isDown)
+	{
+		m_curKey[keyCode] = isDown;
+	}
+
 	inline void SetRotation(float rotation)
 	{
 		m_curRotation = rotation;
@@ -58,7 +63,7 @@ public:
 		return new UserInputAction();
 	}
 
-	inline static void Finalizer(Action*& a)
+	inline static void Finalizer(Action* a)
 	{
 		delete ((UserInputAction*)a);
 	}
