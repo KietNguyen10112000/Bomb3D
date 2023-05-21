@@ -154,6 +154,7 @@
     <ClInclude Include="..\GameActions\UserInputAction.h" />
     <ClInclude Include="..\Synch\Action.h" />
     <ClInclude Include="..\Synch\ByteStream.h" />
+    <ClInclude Include="..\Synch\FixedSizeConcurrentQueue.h" />
     <ClInclude Include="..\Synch\Package.h" />
     <ClInclude Include="GameMgr.h" />
     <ClInclude Include="GameRoom.h" />

@@ -160,47 +160,65 @@ private:
 	}
 
 public:
+	ByteStream* m_curSendingStream = nullptr;
 	inline void TransportLoop()
 	{
 		auto& conn = *Global::Get().connector;
-		ByteStream* userStream;
 
 		while (m_isTransportRunning)
 		{
+			bool allowSleep = true;
 			auto start = Clock::ms::now();
 			//m_maxIteration++;
 			while (true)
 			{
-				if (!m_sendActions.try_dequeue(userStream))
+				if (m_curSendingStream == nullptr && !m_sendActions.try_dequeue(m_curSendingStream))
 				{
 					break;
 				}
 
 				//std::cout << "Send pkg: " << userStream->GetPayloadSize() << " bytes\n";
-				m_sender.SendSynch(*userStream, conn);
-				auto lockedStreamIdx = userStream - m_sendStreams;
-				m_sendStreams[lockedStreamIdx].Clean();
-				m_sendStreamsLock[lockedStreamIdx].unlock_no_check_own_thread();
-				
-				/*while (true)
+				auto sendRet = m_sender.TrySend(*m_curSendingStream, conn);
+
+				if (sendRet == PackageSender::ERCODE::SUCCEEDED)
 				{
-					Thread::Sleep(10000);
-				}*/
+					auto lockedStreamIdx = m_curSendingStream - m_sendStreams;
+					m_sendStreams[lockedStreamIdx].Clean();
+					m_sendStreamsLock[lockedStreamIdx].unlock_no_check_own_thread();
+					m_curSendingStream = nullptr;
+				}
+				else if (sendRet == PackageSender::ERCODE::CONNECTION_BUSY)
+				{
+					allowSleep = false;
+					break;
+				}
+				else if (sendRet == PackageSender::ERCODE::CONNECTION_ERROR)
+				{
+					std::cout << "Connection error. Aborted.\n";
+					Throw();
+				}
 			}
 
 			while (true)
 			{
-				auto recvRet = m_receiver.RecvSynch(conn);
-
-				if (recvRet == PackageReceiver::ERCODE::PACKAGE_EMPTY)
+				auto recvRet = m_receiver.TryRecv(conn);
+				if (recvRet == PackageReceiver::ERCODE::SUCCEEDED)
 				{
+					goto RecvSucceeded;
+				}
+				else if (recvRet == PackageReceiver::ERCODE::CONNECTION_BUSY)
+				{
+					allowSleep = false;
 					break;
 				}
 				else if (recvRet == PackageReceiver::ERCODE::CONNECTION_ERROR)
 				{
-					goto Return;
+					//std::cout << "Connection error. Aborted.\n";
+					//Throw();
+					break;
 				}
 
+			RecvSucceeded:
 				auto serverStream = m_receiver.GetStream();
 
 				while (!serverStream.IsEmpty())
@@ -222,7 +240,7 @@ public:
 			}
 
 			auto dt = Clock::ms::now() - start;
-			if (dt < 15)
+			if (allowSleep && dt < 15)
 			{
 				Thread::Sleep(15 - dt);
 			}

@@ -7,18 +7,12 @@
 
 #include "Synch/Package.h"
 #include "Synch/Action.h"
+#include "Synch/FixedSizeConcurrentQueue.h"
 
 #include "GameActions/GameActions.h"
 #include "GameActions/GameActionConfig.h"
 
 #include "GameMgr.h"
-
-struct Client
-{
-	TCPConnector			conn;
-	PackageReceiver			receiver;
-	bool					matched = false;
-};
 
 class GameRoom
 {
@@ -33,6 +27,27 @@ public:
 
 	constexpr static size_t NUM_BUFFERED_SEND_PKG		= 32;
 
+	struct Client
+	{
+		GameRoom*				room;
+		TCPConnector			conn;
+		PackageReceiver			receiver;
+		PackageSender			sender;
+
+		// capacity must be > GameRoom::NUM_BUFFERED_SEND_PKG
+		FixedSizeConcurrentQueue<ByteStream*, 128> sendingQueue;
+
+		ByteStream*				sendingPkg = nullptr;
+
+		Spinlock				sendQueueLock;
+		bool					matched = false;
+
+		inline void OnSendSucceeded(ByteStream* stream)
+		{
+
+		}
+	};
+
 	size_t					m_id						= INVALID_ID;
 	size_t					m_iterationCount			= 0;
 	size_t					m_lastSynchIteration		= 0;
@@ -40,9 +55,12 @@ public:
 	Client					m_clients[MAX_CLIENTS]		= {};
 	size_t					m_clientsCount				= 0;
 
-	PackageSender			m_sender;
-	ByteStream				m_sendPkg					;
-	//Spinlock				m_sendLocks					[MAX_CLIENTS];
+	ByteStream				m_sendPkgs					[NUM_BUFFERED_SEND_PKG];
+	// how many m_sendPkgs[i] reach client i
+	std::atomic<size_t>		m_sendNotReachClientCount	[NUM_BUFFERED_SEND_PKG];
+	Spinlock				m_sendPkgsLock				[NUM_BUFFERED_SEND_PKG];
+	size_t					m_sendPkgIdx				= 0;
+
 
 	ByteStream				m_iterationStreams			[NUM_STREAMS];
 	uint32_t				m_actionsCount				[NUM_STREAMS];
@@ -97,7 +115,15 @@ public:
 
 	inline void SynchAllClients()
 	{
-		m_sendPkg.Clean();
+		auto& sendLock = m_sendPkgsLock[m_sendPkgIdx];
+		sendLock.lock_no_check_own_thread();
+
+		auto& sendPkg = m_sendPkgs[m_sendPkgIdx];
+		sendPkg.Clean();
+
+		m_sendNotReachClientCount[m_sendPkgIdx] = m_clientsCount;
+
+		m_sendPkgIdx = (m_sendPkgIdx + 1) % NUM_BUFFERED_SEND_PKG;
 
 		for (size_t i = 0; i < NUM_TICKS_PER_SEND; i++)
 		{
@@ -108,18 +134,15 @@ public:
 
 		for (size_t i = 0; i < NUM_TICKS_PER_SEND; i++)
 		{
-			m_sendPkg.Merge(m_iterationStreams[i + m_iterationStreamStartIdx]);
+			sendPkg.Merge(m_iterationStreams[i + m_iterationStreamStartIdx]);
 		}
-		/*for (auto& stream : iterationStreams)
-		{
-			sendPkg.Merge(stream);
-		}*/
 
 		for (auto& client : m_clients)
 		{
 			if (!client.conn.IsDisconnected())
 			{
-				m_sender.SendSynch(m_sendPkg, client.conn);
+				//m_sender.SendSynch(m_sendPkg, client.conn);
+				client.sendingQueue.enqueue(&sendPkg);
 			}
 		}
 
@@ -203,32 +226,29 @@ public:
 	{
 		ConsumeActions();
 
-		size_t disconnectedClient = 0;
 		for (auto& client : m_clients)
 		{
 			if (!client.conn.IsDisconnected())
 			{
-				auto ercode = client.receiver.RecvSynch(client.conn);
-				if (ercode == 0)
+				auto recvRet = client.receiver.TryRecv(client.conn);
+				if (recvRet == PackageReceiver::ERCODE::SUCCEEDED)
 				{
 					// success
 
 					auto clientStream = client.receiver.GetStream();
 					ProcessClientStream(clientStream);
 				}
-				else if (ercode == PackageReceiver::ERCODE::CONNECTION_ERROR)
+				else if (recvRet == PackageReceiver::ERCODE::CONNECTION_ERROR)
 				{
 					client.conn.Disconnect();
+					m_clientsCount--;
 				}
-			}
-			else
-			{
-				disconnectedClient++;
 			}
 		}
 
-		if (disconnectedClient == m_clientsCount)
+		if (m_clientsCount == 0)
 		{
+			std::cout << "Room aborted. Room's ID: " << m_id << "\n";
 			Abort();
 		}
 	}
@@ -305,9 +325,11 @@ public:
 		stream.Put<ActionID>(matchStart->GetActionID());
 		matchStart->Serialize(stream);
 
+		auto sender = m_clients[0].sender;
+
 		for (auto& client : m_clients)
 		{
-			m_sender.SendSynch(stream, client.conn);
+			sender.SendSynch(stream, client.conn);
 		}
 
 		ActionCreator::Delete(matchStart);
@@ -317,16 +339,31 @@ public:
 	{
 		if (m_isInitOnce == false)
 		{
-			m_sendPkg.Initialize(Package::MAX_LEN);
+			for (auto& stream : m_sendPkgs)
+			{
+				stream.Initialize(Package::MAX_LEN);
+			}
+
 			for (auto& stream : m_iterationStreams)
 			{
 				stream.Initialize(64 * KB);
 			}
+
+			for (auto& client : m_clients)
+			{
+				client.room = this;
+				client.receiver.Initialize();
+			}
+
 			m_isInitOnce = true;
 		}
 		else
 		{
-			m_sendPkg.Clean();
+			for (auto& stream : m_sendPkgs)
+			{
+				stream.Clean();
+			}
+
 			for (auto& stream : m_iterationStreams)
 			{
 				stream.Clean();
@@ -358,10 +395,10 @@ public:
 		return m_clients[id].conn;
 	}
 
-	inline void InitializeClient(size_t id)
+	/*inline void InitializeClient(size_t id)
 	{
 		m_clients[id].receiver.Initialize();
-	}
+	}*/
 
 	// thread-safe method
 	inline void ExecuteAction(Action* action)
@@ -387,4 +424,77 @@ public:
 	inline virtual void Update(float dt) {};
 
 	static GameRoom* GetRoom(size_t id);
+
+
+	inline static void TransportLoop(bool* running, size_t startIdx, GameRoom* rooms, size_t roomCount)
+	{
+		while (*running)
+		{
+			bool allowSleep = true;
+			auto start = Clock::ms::now();
+
+			for (size_t i = 0; i < roomCount; i++)
+			{
+				auto idx = startIdx % roomCount;
+				auto& room = rooms[idx];
+
+				if (room.m_id == INVALID_ID)
+				{
+					continue;
+				}
+
+				bool retryLoopAllClient = false;
+
+				do
+				{
+					retryLoopAllClient = false;
+					for (auto& client : room.m_clients)
+					{
+						if (!client.sendingQueue.Empty())
+						{
+							if (client.sendQueueLock.try_lock())
+							{
+								if (client.sendingPkg == nullptr)
+								{
+									if (client.sendingQueue.try_dequeue(client.sendingPkg))
+									{
+										retryLoopAllClient = true;
+									}
+								}
+
+								if (client.sendingPkg)
+								{
+									auto sendRet = client.sender.TrySend(*client.sendingPkg, client.conn);
+
+									if (sendRet == PackageSender::ERCODE::SUCCEEDED 
+										|| sendRet == PackageSender::ERCODE::CONNECTION_ERROR)
+									{
+										auto pkgIdx = (client.sendingPkg - room.m_sendPkgs);
+										if (--(room.m_sendNotReachClientCount[pkgIdx]) == 0)
+										{
+											//std::cout << "pkgIdx " << pkgIdx << "\n";
+											room.m_sendPkgsLock[pkgIdx].unlock_no_check_own_thread();
+										}
+										client.sendingPkg = nullptr;
+									}
+									else if (sendRet == PackageSender::ERCODE::CONNECTION_BUSY)
+									{
+										allowSleep = false;
+									}
+								}
+
+								client.sendQueueLock.unlock();
+							}
+						}
+					}
+				} while (retryLoopAllClient);
+			}
+
+			auto dt = Clock::ms::now() - start;
+			if (allowSleep && dt < 8)
+			{
+				Thread::Sleep(8 - dt);
+			}
+		}
+	}
 };

@@ -20,7 +20,8 @@ struct Global
 		return *s_instance;
 	}
 
-	constexpr static size_t MAX_ROOMS = 128;
+	constexpr static size_t MAX_ROOMS				= 128;
+	constexpr static size_t NUM_TRANSPORT_TASK		= 2;
 
 	float					fixedDt = 0.016f;
 	ServerLoopHandler*		serverLoop = nullptr;
@@ -29,6 +30,8 @@ struct Global
 	size_t					gameRoomIdx = 0;
 
 	TCPAcceptor				acceptor;
+
+	std::atomic<size_t>		transportLoopIdx = 0;
 
 #ifdef SERVER_REPL
 	ConcurrentQueue<String>	replStr = ConcurrentQueue<String>(128);

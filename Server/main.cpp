@@ -75,6 +75,11 @@ class ServerLoopHandler;
 
 Global* Global::s_instance = nullptr;
 
+inline bool IsFullRoom()
+{
+	return Global::Get().gameRoomIdx == INVALID_ID;
+}
+
 inline auto& GetCurrentMatchingRoom()
 {
 	return Global::Get().gameRoom[Global::Get().gameRoomIdx];
@@ -90,9 +95,11 @@ inline auto NextRoomIdx()
 		if (Global::Get().gameRoom[idx].m_id == INVALID_ID)
 		{
 			Global::Get().gameRoomIdx = idx;
-			break;
+			return;
 		}
 	}
+
+	Global::Get().gameRoomIdx = INVALID_ID;
 }
 
 class ServerLoopHandler : public IterationHandler
@@ -119,22 +126,25 @@ class ServerLoopHandler : public IterationHandler
 		ConsumeRepl();
 #endif // SERVER_REPL
 
-		auto& room = GetCurrentMatchingRoom();
-		auto& conn = room.GetClientConn(room.m_clientsCount);
-		auto ret = Global::Get().acceptor.Accept(conn);
-
-		if (ret == 0)
+		if (!IsFullRoom())
 		{
-			room.InitializeClient(room.m_clientsCount);
-			conn.SetBlockingMode(false);
-			std::cout << "Client connected\n";
-			room.m_clientsCount++;
+			auto& room = GetCurrentMatchingRoom();
+			auto& conn = room.GetClientConn(room.m_clientsCount);
+			auto ret = Global::Get().acceptor.Accept(conn);
 
-			if (room.m_clientsCount == 2)
+			if (ret == 0)
 			{
-				room.m_id = Global::Get().gameRoomIdx;
-				room.StartUp();
-				NextRoomIdx();
+				//room.InitializeClient(room.m_clientsCount);
+				conn.SetBlockingMode(false);
+				std::cout << "Client connected\n";
+				room.m_clientsCount++;
+
+				if (room.m_clientsCount == 2)
+				{
+					room.m_id = Global::Get().gameRoomIdx;
+					room.StartUp();
+					NextRoomIdx();
+				}
 			}
 		}
 
@@ -157,6 +167,19 @@ void Initialize(Engine* engine)
 	Global::s_instance = new Global();
 	Global::Get().serverLoop = new ServerLoopHandler();
 	engine->SetIterationHandler(Global::Get().serverLoop);
+
+	Task tasks[Global::NUM_TRANSPORT_TASK];
+	for (auto& task : tasks)
+	{
+		task.Entry() = [](void* p)
+		{
+			auto e = (Engine*)p;
+			auto startIdx = Global::Get().transportLoopIdx.fetch_add(Global::MAX_ROOMS / Global::NUM_TRANSPORT_TASK);
+			GameRoom::TransportLoop(&e->IsRunning(), startIdx, Global::Get().gameRoom, Global::MAX_ROOMS);
+		};
+		task.Params() = engine;
+	}
+	TaskSystem::Submit(tasks, Global::NUM_TRANSPORT_TASK, Task::CRITICAL);
 
 	TCP_SOCKET_DESCRIPTION desc;
 	desc.host = "0.0.0.0";
