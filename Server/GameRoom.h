@@ -137,6 +137,7 @@ public:
 			sendPkg.Merge(m_iterationStreams[i + m_iterationStreamStartIdx]);
 		}
 
+		sendPkg.Pack();
 		for (auto& client : m_clients)
 		{
 			if (!client.conn.IsDisconnected())
@@ -435,7 +436,7 @@ public:
 
 			for (size_t i = 0; i < roomCount; i++)
 			{
-				auto idx = startIdx % roomCount;
+				auto idx = (i + startIdx) % roomCount;
 				auto& room = rooms[idx];
 
 				if (room.m_id == INVALID_ID)
@@ -450,7 +451,7 @@ public:
 					retryLoopAllClient = false;
 					for (auto& client : room.m_clients)
 					{
-						if (!client.sendingQueue.Empty())
+						if (!client.sendingQueue.Empty() || client.sendingPkg)
 						{
 							if (client.sendQueueLock.try_lock())
 							{

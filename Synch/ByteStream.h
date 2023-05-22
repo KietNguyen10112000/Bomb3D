@@ -286,4 +286,9 @@ public:
 		memcpy(m_cur, another.m_begin + sizeof(uint32_t), growthSize);
 		m_cur += growthSize;
 	}
+
+	inline void Pack()
+	{
+		PackSize();
+	}
 };
