@@ -29,6 +29,8 @@ public:
 	ID m_userID = INVALID_ID;
 	ID m_roomID = INVALID_ID;
 
+	size_t m_sendUserIDIdx = INVALID_ID;
+
 	MatchStartAction();
 
 	inline static Action* Initializer()
@@ -42,7 +44,7 @@ public:
 	}
 
 	// Inherited via Action
-	virtual void Serialize(ByteStream& stream) const override;
+	virtual void Serialize(ByteStream& stream) override;
 	virtual void Deserialize(ByteStreamRead& stream) override;
 	virtual void Activate(Scene2D* scene) override;
 

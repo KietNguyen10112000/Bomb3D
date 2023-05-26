@@ -1,14 +1,16 @@
 #include "UserInputAction.h"
 #include "GameActions.h"
 
+#ifdef _CLIENT
 #include "Client/Global.h"
 #include "Client/GameLoopHandler.h"
+#endif // _CLIENT
 
 UserInputAction::UserInputAction() : Action(GameActions::USER_INPUT)
 {
 }
 
-void UserInputAction::Serialize(ByteStream& stream) const
+void UserInputAction::Serialize(ByteStream& stream)
 {
 	if (m_input)
 	{
@@ -60,6 +62,7 @@ void UserInputAction::Deserialize(ByteStreamRead& stream)
 
 void UserInputAction::Activate(Scene2D* scene)
 {
+#ifdef _CLIENT
 	auto input = &Global::Get().gameLoop->m_userInput[m_userId];
 	input->m_synchRotation = m_synchRotation;
 	for (size_t i = 0; i < (size_t)m_changedKeyCount; i++)
@@ -67,4 +70,5 @@ void UserInputAction::Activate(Scene2D* scene)
 		auto keyCode = m_changedKey[i];
 		input->m_synchKey[keyCode] = !input->m_synchKey[keyCode];
 	}
+#endif
 }

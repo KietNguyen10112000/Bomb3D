@@ -16,7 +16,7 @@ MatchStartAction::MatchStartAction() : Action(GameActions::ACTION_ID::MATCH_STAR
 {
 }
 
-void MatchStartAction::Serialize(ByteStream& stream) const
+void MatchStartAction::Serialize(ByteStream& stream)
 {
 	stream.Put(m_width);
 	stream.Put(m_height);
@@ -32,7 +32,7 @@ void MatchStartAction::Serialize(ByteStream& stream) const
 		stream.Put<Vec2>(client.pos);
 	}
 
-	stream.Put(m_userID);
+	m_sendUserIDIdx = stream.Put(m_userID);
 	stream.Put(m_roomID);
 }
 

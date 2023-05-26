@@ -58,6 +58,7 @@ void AddStaticObjects(Scene2D* scene, byte* mapValues, size_t width, size_t heig
 void AddPlayer(Scene2D* scene, ID id, const Vec2& pos, size_t width, size_t height)
 {
 	auto player = mheap::New<GameObject2D>(GameObject2D::DYNAMIC);
+	player->Tag() = TAG::PLAYER;
 	player->Position() = pos;
 	auto sprites = player->NewComponent<SpritesRenderer>();
 	sprites->SetSprite(sprites->Load(String::Format("Player_{}.png", id), AARect(), Vec2(50, 50)));
@@ -70,6 +71,7 @@ void AddPlayer(Scene2D* scene, ID id, const Vec2& pos, size_t width, size_t heig
 	auto cellCollider = MakeShared<AARectCollider>(AARect({ 0,0 }, { 50,50 }), Vec2(5, 5));
 	player->NewComponent<RigidBody2D>(RigidBody2D::KINEMATIC, cellCollider)
 		->CollisionMask() = (1ull << 2);
+
 
 	if (Global::Get().userId == id)
 	{

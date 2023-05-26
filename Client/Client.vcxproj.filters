@@ -75,9 +75,15 @@
     <ClInclude Include="GameInit.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="TAG.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="..\DebugView.natvis">
+      <Filter>Natvis</Filter>
+    </Natvis>
+    <Natvis Include="..\glm.natvis">
       <Filter>Natvis</Filter>
     </Natvis>
   </ItemGroup>

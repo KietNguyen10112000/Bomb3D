@@ -240,9 +240,9 @@ public:
 			}
 
 			auto dt = Clock::ms::now() - start;
-			if (allowSleep && dt < 15)
+			if (allowSleep && dt < 8)
 			{
-				Thread::Sleep(15 - dt);
+				Thread::Sleep(8 - dt);
 			}
 		}
 
@@ -288,7 +288,7 @@ public:
 					for (size_t i = 0; i < clientCount; i++)
 					{
 						auto& client = clients[i];
-						if (ownIP == client.ipAddr)
+						if (i == matchStart->m_userID)
 						{
 							std::cout << "Player id: " << client.id << "\n";
 							Global::Get().userId = client.id;

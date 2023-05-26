@@ -26,6 +26,7 @@ using namespace soft;
 class PlayerScript : Traceable<PlayerScript>, public Script2D
 {
 protected:
+	SCRIPT2D_DEFAULT_METHOD(PlayerScript);
 	using Base = Script2D;
 	TRACEABLE_FRIEND();
 	void Trace(Tracer* tracer)
@@ -264,9 +265,12 @@ public:
 			auto bulletRdr = bullet->NewComponent<SpriteRenderer>("red.png");
 			bulletRdr->Sprite().FitTextureSize({ 60, 10 });
 			bulletRdr->Sprite().SetAnchorPoint({ 0.5f, 0.5f });
-			bullet->NewComponent<BulletScript>()->Setup(GetObject(), dir, 3000.0f);
-			bullet->NewComponent<Physics2D>(Physics2D::SENSOR, m_bulletCollider)
-				->CollisionMask() = (1ull << 3);
+
+			bullet->NewComponent<FastBulletScript>()->Setup(GetObject(), dir, 3000.0f);
+
+			/*bullet->NewComponent<Physics2D>(Physics2D::SENSOR, m_bulletCollider)
+				->CollisionMask() = (1ull << 3);*/
+
 			bullet->Position() = Position();
 			bullet->Position().x += 25;
 			bullet->Position().y += 40;

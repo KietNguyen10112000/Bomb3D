@@ -69,7 +69,7 @@ public:
 	}
 
 	// Inherited via Action
-	virtual void Serialize(ByteStream& stream) const override;
+	virtual void Serialize(ByteStream& stream) override;
 	virtual void Deserialize(ByteStreamRead& stream) override;
 	virtual void Activate(Scene2D* scene) override;
 

@@ -30,7 +30,7 @@ private:
 public:
 	inline Action(ActionID id) : m_id(id) {};
 
-	virtual void Serialize(ByteStream& stream) const = 0;
+	virtual void Serialize(ByteStream& stream) = 0;
 	virtual void Deserialize(ByteStreamRead& stream) = 0;
 	virtual void Activate(Scene2D* scene) = 0;
 

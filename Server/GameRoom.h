@@ -191,10 +191,10 @@ public:
 
 			auto offsetIteration = clientIteration - minIteration;
 
-			if (offsetIteration >= NUM_BUFFERED_TICKS)
+			/*if (offsetIteration >= NUM_BUFFERED_TICKS)
 			{
 				std::cout << offsetIteration << '\n';
-			}
+			}*/
 
 			//auto serverActivateIteration = lastSynchIteration + offsetIteration;
 
@@ -326,11 +326,16 @@ public:
 		stream.Put<ActionID>(matchStart->GetActionID());
 		matchStart->Serialize(stream);
 
+		auto idx = matchStart->m_sendUserIDIdx;
+
 		auto sender = m_clients[0].sender;
 
+		size_t id = 0;
 		for (auto& client : m_clients)
 		{
+			stream.Set(idx, id);
 			sender.SendSynch(stream, client.conn);
+			id++;
 		}
 
 		ActionCreator::Delete(matchStart);
