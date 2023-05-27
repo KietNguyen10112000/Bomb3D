@@ -139,7 +139,7 @@ class ServerLoopHandler : public IterationHandler
 				std::cout << "Client connected\n";
 				room.m_clientsCount++;
 
-				if (room.m_clientsCount == 3)
+				if (room.m_clientsCount == 1)
 				{
 					room.m_id = Global::Get().gameRoomIdx;
 					room.StartUp();

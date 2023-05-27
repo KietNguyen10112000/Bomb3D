@@ -179,6 +179,7 @@ public:
 
 				//std::cout << "Send pkg: " << userStream->GetPayloadSize() << " bytes\n";
 				auto sendRet = m_sender.TrySend(*m_curSendingStream, conn);
+				//auto sendRet = m_sender.TrySendTest(*m_curSendingStream, conn);
 
 				if (sendRet == PackageSender::ERCODE::SUCCEEDED)
 				{
@@ -240,9 +241,9 @@ public:
 			}
 
 			auto dt = Clock::ms::now() - start;
-			if (allowSleep && dt < 8)
+			if (allowSleep && dt < 15)
 			{
-				Thread::Sleep(8 - dt);
+				Thread::Sleep(15 - dt);
 			}
 		}
 

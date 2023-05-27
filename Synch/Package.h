@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Core/TypeDef.h"
+#include "Core/Thread/Thread.h"
+
 #include "Network/TCPConnector.h"
 
 #include "ByteStream.h"
@@ -151,6 +153,7 @@ public:
 			auto ret = conn.Recv(&m_buffer[m_recvedPkgSize], realPkgSize - m_recvedPkgSize);
 			if (ret == SOCKET_ERCODE::WOULD_BLOCK)
 			{
+				//std::cout << "PackageReceiver::CONNECTION_BUSY\n";
 				return CONNECTION_BUSY;
 			} 
 			else if (ret < 0)

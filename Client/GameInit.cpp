@@ -6,6 +6,8 @@
 
 #include "GameInit.h"
 
+#include "Components2D/Rendering/AnimatedSpritesRenderer.h"
+
 using namespace soft;
 
 void AddStaticObjects(Scene2D* scene, byte* mapValues, size_t width, size_t height,
@@ -128,6 +130,28 @@ void AddMapRenderer(Scene2D* scene, const byte* mapValues, size_t width, size_t 
 	}
 
 	scene->AddObject(map);
+
+	{
+		auto object = mheap::New<GameObject2D>(GameObject2D::GHOST);
+		object->Position() = { 200, 200 };
+		object->Scale() = { 2.0f, 2.0f };
+
+		auto rdr = object->NewComponent<AnimatedSpritesRenderer>();
+		rdr->ClearAABB();
+
+		ID spriteFrameIDs[12] = {};
+
+		for (size_t i = 0; i < 12; i++)
+		{
+			spriteFrameIDs[i] = rdr->LoadSpriteFrame(
+				String::Format("monsters/swordsman/monster_swordsman_run_{%04d}.png", i)
+			);
+		}
+
+		auto animID = rdr->MakeAnimation(spriteFrameIDs, 12, 0.5f);
+		rdr->SetAnimation(animID);
+		scene->AddObject(object);
+	}
 }
 
 //void AddDynamicObjects(Scene2D* scene)
