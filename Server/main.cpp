@@ -5,11 +5,15 @@
 
 #include "TaskSystem/TaskSystem.h"
 
-#define SERVER_REPL
+#ifdef _DEBUG
+//#define SERVER_REPL
+#endif // _DEBUG
 
 #include "Global.h"
 
 #include "GameActions/GameActions.h"
+
+constexpr static size_t TIME_IDLE = 8; // ms
 
 void InitConsole(Engine* engine)
 {
@@ -77,17 +81,11 @@ Global* Global::s_instance = nullptr;
 
 inline bool IsFullRoom()
 {
-	return Global::Get().gameRoomIdx == INVALID_ID;
+	return Global::Get().gameRoomCount.load(std::memory_order_relaxed) == Global::MAX_ROOMS;
 }
 
-inline auto& GetCurrentMatchingRoom()
+inline void FindNextRoomIdx()
 {
-	return Global::Get().gameRoom[Global::Get().gameRoomIdx];
-}
-
-inline auto NextRoomIdx()
-{
-	Global::Get().gameRoomIdx++;
 	for (size_t i = 0; i < Global::MAX_ROOMS; i++)
 	{
 		auto idx = (i + Global::Get().gameRoomIdx) % Global::MAX_ROOMS;
@@ -98,13 +96,59 @@ inline auto NextRoomIdx()
 			return;
 		}
 	}
-
 	Global::Get().gameRoomIdx = INVALID_ID;
+}
+
+inline auto& GetCurrentMatchingRoom()
+{
+	if (Global::Get().gameRoom[Global::Get().gameRoomIdx].m_id == INVALID_ID)
+	{
+		FindNextRoomIdx();
+	}
+	return Global::Get().gameRoom[Global::Get().gameRoomIdx];
+}
+
+inline auto NextRoomIdx()
+{
+	Global::Get().gameRoomCount++;
+	Global::Get().gameRoomIdx++;
+	FindNextRoomIdx();
+}
+
+inline void AcceptClient(void*)
+{
+	if (!IsFullRoom())
+	{
+		auto& room = GetCurrentMatchingRoom();
+		auto& conn = room.GetClientConn(room.m_clientsCount);
+		auto ret = Global::Get().acceptor.Accept(conn);
+
+		if (ret == 0)
+		{
+			//room.InitializeClient(room.m_clientsCount);
+			conn.SetBlockingMode(false);
+			std::cout << "Client connected\n";
+			room.m_clientsCount++;
+
+			if (room.m_clientsCount == 2)
+			{
+				room.m_abortCallback = [](void*)
+				{
+					Global::Get().gameRoomCount--;
+				};
+				room.StartUp(Global::Get().gameRoomIdx);
+				room.m_id = Global::Get().gameRoomIdx;
+				NextRoomIdx();
+			}
+		}
+	}
+
+	Global::Get().acceptClientLock.exchange(false, std::memory_order_release);
 }
 
 class ServerLoopHandler : public IterationHandler
 {
-	inline void UpdateAllRoom()
+	/*inline void UpdateAllRoom()
 	{
 		auto fixedDt = Global::Get().fixedDt;
 		for (size_t i = 0; i < Global::MAX_ROOMS; i++)
@@ -117,48 +161,88 @@ class ServerLoopHandler : public IterationHandler
 
 			room.FixedIteration(fixedDt);
 		}
-	}
+	}*/
 
 	// Inherited via IterationHandler
 	virtual float DoIteration(float sumDt, Scene2D* scene) override
 	{
+		//auto cur = Clock::ms::now();
+
 #ifdef SERVER_REPL
 		ConsumeRepl();
 #endif // SERVER_REPL
 
-		if (!IsFullRoom())
+		if (Global::Get().acceptClientLock.load(std::memory_order_relaxed) == false
+			&& Global::Get().acceptClientLock.exchange(true, std::memory_order_acquire) == false)
 		{
-			auto& room = GetCurrentMatchingRoom();
-			auto& conn = room.GetClientConn(room.m_clientsCount);
-			auto ret = Global::Get().acceptor.Accept(conn);
+			Task task;
+			task.Entry() = AcceptClient;
+			TaskSystem::Submit(task, Task::CRITICAL);
+		}
 
-			if (ret == 0)
+		struct UpdateTaskParams
+		{
+			float sumDt = 0;
+			size_t startIdx = 0;
+		};
+
+		static UpdateTaskParams		updateParams		[Global::NUM_UPDATE_TASK];
+		static Task					updateTasks			[Global::NUM_UPDATE_TASK];
+		static size_t				globalIterationCount = 1;
+
+		globalIterationCount++;
+		if (globalIterationCount == 0)
+		{
+			globalIterationCount = 1;
+		}
+
+		for (size_t i = 0; i < Global::NUM_UPDATE_TASK; i++)
+		{
+			auto& params	= updateParams[i];
+			auto& task		= updateTasks[i];
+
+			params.startIdx = i * Global::MAX_ROOMS / Global::NUM_UPDATE_TASK;
+			params.sumDt = sumDt;
+
+			task.Entry() = [](void* p)
 			{
-				//room.InitializeClient(room.m_clientsCount);
-				conn.SetBlockingMode(false);
-				std::cout << "Client connected\n";
-				room.m_clientsCount++;
+				TASK_SYSTEM_UNPACK_PARAM_2(UpdateTaskParams, p, sumDt, startIdx);
 
-				if (room.m_clientsCount == 1)
+				auto start = Clock::ms::now();
+
+				((UpdateTaskParams*)p)->sumDt = GameRoom::UpdateAllRooms(globalIterationCount, 
+					Global::Get().fixedDt, sumDt, startIdx, Global::Get().gameRoom, Global::MAX_ROOMS);
+
+				auto dt = Clock::ms::now() - start;
+				if (dt < TIME_IDLE)
 				{
-					room.m_id = Global::Get().gameRoomIdx;
-					room.StartUp();
-					NextRoomIdx();
+					Thread::Sleep(TIME_IDLE - dt);
 				}
-			}
+			};
+			task.Params() = &params;
 		}
 
-		auto fixedDt = Global::Get().fixedDt;
-		while (sumDt > fixedDt)
-		{
-			UpdateAllRoom();
-			sumDt -= fixedDt;
-		}
-
-		return sumDt;
+		TaskSystem::SubmitAndWait(updateTasks, Global::NUM_UPDATE_TASK, Task::CRITICAL);
+		//updateTasks[0].Entry()(&updateParams[0]);
+		return updateParams->sumDt;
 	}
 };
 
+void InitializeSendTasks(Engine* engine)
+{
+	Task tasks[Global::NUM_SEND_TASK];
+	for (auto& task : tasks)
+	{
+		task.Entry() = [](void* p)
+		{
+			auto e = (Engine*)p;
+			auto startIdx = Global::Get().sendLoopIdx.fetch_add(Global::MAX_ROOMS / Global::NUM_SEND_TASK);
+			GameRoom::SendLoop<TIME_IDLE>(&e->IsRunning(), startIdx, Global::Get().gameRoom, Global::MAX_ROOMS);
+		};
+		task.Params() = engine;
+	}
+	TaskSystem::Submit(tasks, Global::NUM_SEND_TASK, Task::CRITICAL);
+}
 
 void Initialize(Engine* engine)
 {
@@ -168,18 +252,7 @@ void Initialize(Engine* engine)
 	Global::Get().serverLoop = new ServerLoopHandler();
 	engine->SetIterationHandler(Global::Get().serverLoop);
 
-	Task tasks[Global::NUM_TRANSPORT_TASK];
-	for (auto& task : tasks)
-	{
-		task.Entry() = [](void* p)
-		{
-			auto e = (Engine*)p;
-			auto startIdx = Global::Get().transportLoopIdx.fetch_add(Global::MAX_ROOMS / Global::NUM_TRANSPORT_TASK);
-			GameRoom::TransportLoop(&e->IsRunning(), startIdx, Global::Get().gameRoom, Global::MAX_ROOMS);
-		};
-		task.Params() = engine;
-	}
-	TaskSystem::Submit(tasks, Global::NUM_TRANSPORT_TASK, Task::CRITICAL);
+	InitializeSendTasks(engine);
 
 	TCP_SOCKET_DESCRIPTION desc;
 	desc.host = "0.0.0.0";
@@ -192,8 +265,6 @@ void Initialize(Engine* engine)
 
 void Finalize(Engine* engine)
 {
-	std::cout << "Bye!\n";
-
 	delete Global::Get().serverLoop;
 	delete Global::s_instance;
 }

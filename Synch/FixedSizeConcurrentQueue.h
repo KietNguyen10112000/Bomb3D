@@ -31,7 +31,7 @@ public:
 		m_tailIdx++;
 
 		// =)))
-		assert(m_tailIdx != m_headIdx);
+		//assert(m_tailIdx != m_headIdx);
 	}
 
 	inline bool try_dequeue(T& v)

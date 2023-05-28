@@ -41,11 +41,6 @@ public:
 
 		Spinlock				sendQueueLock;
 		bool					matched = false;
-
-		inline void OnSendSucceeded(ByteStream* stream)
-		{
-
-		}
 	};
 
 	size_t					m_id						= INVALID_ID;
@@ -74,6 +69,11 @@ public:
 	size_t					m_matchedClient				= 0;
 	bool					m_isInitOnce				= false;
 	bool					m_isMatchedSuccess			= false;
+
+	std::atomic<size_t>		m_globalIterationCount = 0;
+	
+	void (*m_abortCallback)(void*) = nullptr;
+	void *m_abortCallbackUserPtr = nullptr;
 
 	inline void FirstResetIterationStreams()
 	{
@@ -296,12 +296,12 @@ public:
 		ProcessAllClients();
 	}
 
-	inline void SendMatchStartAction()
+	inline void SendMatchStartAction(size_t roomId)
 	{
 		MatchStartAction* matchStart = (MatchStartAction*)ActionCreator::New(GameActions::ACTION_ID::MATCH_START);
 
 		matchStart->m_numClient = m_clientsCount;
-		matchStart->m_roomID = m_id;
+		matchStart->m_roomID = roomId;
 
 		m_gameMgr.GenerateMap(
 			matchStart->m_map, matchStart->m_width, matchStart->m_height,
@@ -341,7 +341,7 @@ public:
 		ActionCreator::Delete(matchStart);
 	}
 
-	inline void StartUp()
+	inline void StartUp(size_t roomId)
 	{
 		if (m_isInitOnce == false)
 		{
@@ -376,24 +376,27 @@ public:
 			}
 		}
 		
-		SendMatchStartAction();
+		SendMatchStartAction(roomId);
 		FirstResetIterationStreams();
 		m_iterationCount++;
 	}
 
 	inline void Abort()
 	{
-		m_id = INVALID_ID;
 		m_iterationCount = 0;
 		m_clientsCount = 0;
 		m_iterationStreamStartIdx = 0;
 		m_matchedClient = 0;
 		m_isMatchedSuccess = false;
+		m_globalIterationCount = 0;
 		
 		for (auto& client : m_clients)
 		{
 			client.matched = false;
 		}
+
+		m_abortCallback(m_abortCallbackUserPtr);
+		m_id = INVALID_ID;
 	}
 
 	inline auto& GetClientConn(size_t id)
@@ -431,8 +434,8 @@ public:
 
 	static GameRoom* GetRoom(size_t id);
 
-
-	inline static void TransportLoop(bool* running, size_t startIdx, GameRoom* rooms, size_t roomCount)
+	template <size_t TIME_PER_LOOP_MS = 8>
+	inline static void SendLoop(bool* running, size_t startIdx, GameRoom* rooms, size_t roomCount)
 	{
 		while (*running)
 		{
@@ -497,10 +500,47 @@ public:
 			}
 
 			auto dt = Clock::ms::now() - start;
-			if (allowSleep && dt < 8)
+			if (allowSleep && dt < TIME_PER_LOOP_MS)
 			{
-				Thread::Sleep(8 - dt);
+				Thread::Sleep(TIME_PER_LOOP_MS - dt);
 			}
 		}
 	}
+
+	inline static float UpdateAllRooms(size_t iterationCount, float fixedDt, float sumDt, 
+		size_t startIdx, GameRoom* rooms, size_t roomCount)
+	{
+		if (sumDt > fixedDt)
+		{
+			size_t count = (size_t)std::floor(sumDt / fixedDt);
+			sumDt -= count * fixedDt;
+
+			for (size_t i = 0; i < roomCount; i++)
+			{
+				auto idx = (i + startIdx) % roomCount;
+				auto& room = rooms[idx];
+				if (room.m_id == INVALID_ID)
+				{
+					continue;
+				}
+
+				if (room.m_globalIterationCount.load(std::memory_order_relaxed) != iterationCount
+					&& room.m_globalIterationCount.exchange(iterationCount) != iterationCount)
+				{
+					for (size_t j = 0; j < count; j++)
+					{
+						if (room.m_id == INVALID_ID)
+						{
+							break;
+						}
+
+						room.FixedIteration(fixedDt);
+					}
+				}
+			}
+		}
+
+		return sumDt;
+	}
+
 };
