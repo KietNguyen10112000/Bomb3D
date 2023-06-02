@@ -161,6 +161,7 @@
     <ClInclude Include="MapRenderer.h" />
     <ClInclude Include="PlayerScript.h" />
     <ClInclude Include="TAG.h" />
+    <ClInclude Include="UIScript.h" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="..\DebugView.natvis" />

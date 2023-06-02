@@ -304,6 +304,8 @@ public:
 					
 					AddMapRenderer(scene, matchStart->m_map, matchStart->m_width, matchStart->m_height);
 
+					AddUINode(scene);
+
 					// response for server know we're ready for game
 					auto& sender = Global::Get().gameLoop->m_sender;
 					auto& stream = Global::Get().gameLoop->m_sendStreams[0];

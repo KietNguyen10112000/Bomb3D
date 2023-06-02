@@ -14,6 +14,9 @@
     <Filter Include="Natvis">
       <UniqueIdentifier>{a8b0afe3-ddc9-46f5-b9e6-327c29b59c71}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Game">
+      <UniqueIdentifier>{23c4bcc7-6201-466d-b8a2-1dcaa4da98f3}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -60,9 +63,14 @@
     <ClInclude Include="..\GameActions\MatchStartAction.h">
       <Filter>Source Files\GameActions</Filter>
     </ClInclude>
-    <ClInclude Include="GameMgr.h" />
     <ClInclude Include="..\Synch\FixedSizeConcurrentQueue.h">
       <Filter>Source Files\Synch</Filter>
+    </ClInclude>
+    <ClInclude Include="GameMgr.h">
+      <Filter>Source Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="MazeGenerator.h">
+      <Filter>Source Files\Game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

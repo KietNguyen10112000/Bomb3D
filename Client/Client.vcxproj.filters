@@ -78,6 +78,9 @@
     <ClInclude Include="TAG.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="UIScript.h">
+      <Filter>Source Files\Scripts</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="..\DebugView.natvis">

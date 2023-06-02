@@ -159,6 +159,7 @@
     <ClInclude Include="GameMgr.h" />
     <ClInclude Include="GameRoom.h" />
     <ClInclude Include="Global.h" />
+    <ClInclude Include="MazeGenerator.h" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="..\DebugView.natvis" />

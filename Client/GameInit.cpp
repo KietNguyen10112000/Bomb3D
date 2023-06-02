@@ -2,6 +2,7 @@
 #include "Engine/ENGINE_EVENT.h"
 
 #include "PlayerScript.h"
+#include "UIScript.h"
 #include "MapRenderer.h"
 
 #include "GameInit.h"
@@ -152,6 +153,13 @@ void AddMapRenderer(Scene2D* scene, const byte* mapValues, size_t width, size_t 
 		rdr->SetAnimation(animID);
 		scene->AddObject(object);
 	}
+}
+
+void AddUINode(Scene2D* scene)
+{
+	auto ui = mheap::New<GameObject2D>(GameObject2D::GHOST);
+	ui->NewComponent<UIScript>();
+	scene->AddObject(ui);
 }
 
 //void AddDynamicObjects(Scene2D* scene)

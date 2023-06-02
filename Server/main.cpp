@@ -130,7 +130,7 @@ inline void AcceptClient(void*)
 			std::cout << "Client connected\n";
 			room.m_clientsCount++;
 
-			if (room.m_clientsCount == 2)
+			if (room.m_clientsCount == 1)
 			{
 				room.m_abortCallback = [](void*)
 				{

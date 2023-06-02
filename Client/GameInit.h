@@ -15,3 +15,5 @@ void AddStaticObjects(Scene2D* scene, byte* mapValues, size_t width, size_t heig
 void AddPlayer(Scene2D* scene, ID id, const Vec2& pos, size_t width, size_t height);
 
 void AddMapRenderer(Scene2D* scene, const byte* mapValues, size_t width, size_t height);
+
+void AddUINode(Scene2D* scene);
