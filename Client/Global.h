@@ -5,6 +5,9 @@
 #include "Synch/Package.h"
 #include "Synch/Action.h"
 
+#include "GameSetting.h"
+#include "GameMap.h"
+
 using namespace soft;
 
 class GameLoopHandler;
@@ -27,6 +30,10 @@ struct Global
 	ByteStream* actionStream;
 
 	size_t userId = 0;
+
+	Scene2D* activeScene;
+	GameSetting setting;
+	GameMap gameMap;
 
 	inline void ExecuteAction(Action* action)
 	{

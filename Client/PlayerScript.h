@@ -72,6 +72,11 @@ public:
 
 	inline void RecordInputAction()
 	{
+		if (Global::Get().setting.playerControlMode != GameSetting::PlayerControlMode::NONE)
+		{
+			return;
+		}
+
 		if (Input()->IsKeyPressed(KEYBOARD::ESC))
 		{
 			m_enableMouse = !m_enableMouse;

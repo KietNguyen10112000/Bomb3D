@@ -23,6 +23,12 @@ public:
 		return m_tailIdx == m_headIdx;
 	}
 
+	inline void Clear()
+	{
+		m_headIdx = 0;
+		m_tailIdx = 0;
+	}
+
 	inline void enqueue(const T& v)
 	{
 		auto idx = m_tailIdx % N;

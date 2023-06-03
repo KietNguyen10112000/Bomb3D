@@ -343,6 +343,26 @@ public:
 
 	inline void StartUp(size_t roomId)
 	{
+		for (auto& client : m_clients)
+		{
+			client.matched = false;
+			client.sendQueueLock.lock();
+			client.sendingPkg = nullptr;
+			client.sendingQueue.Clear();
+			client.sendQueueLock.unlock();
+		}
+
+		for (auto& v : m_sendNotReachClientCount)
+		{
+			v = 0;
+		}
+
+		m_sendPkgIdx = 0;
+		for (auto& sendPkgLock : m_sendPkgsLock)
+		{
+			sendPkgLock.unlock_no_check_own_thread();
+		}
+
 		if (m_isInitOnce == false)
 		{
 			for (auto& stream : m_sendPkgs)
@@ -389,11 +409,7 @@ public:
 		m_matchedClient = 0;
 		m_isMatchedSuccess = false;
 		m_globalIterationCount = 0;
-		
-		for (auto& client : m_clients)
-		{
-			client.matched = false;
-		}
+		m_lastSynchIteration = 0;
 
 		m_abortCallback(m_abortCallbackUserPtr);
 		m_id = INVALID_ID;

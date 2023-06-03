@@ -13,7 +13,7 @@
 
 #include "GameActions/GameActions.h"
 
-constexpr static size_t TIME_IDLE = 8; // ms
+constexpr static size_t TIME_IDLE = 15; // ms
 
 void InitConsole(Engine* engine)
 {
@@ -101,11 +101,26 @@ inline void FindNextRoomIdx()
 
 inline auto& GetCurrentMatchingRoom()
 {
+#ifdef _DEBUG
+	//FindNextRoomIdx();
+	for (size_t i = 0; i < Global::MAX_ROOMS; i++)
+	{
+		auto idx = i % Global::MAX_ROOMS;
+
+		if (Global::Get().gameRoom[idx].m_id == INVALID_ID)
+		{
+			Global::Get().gameRoomIdx = idx;
+			break;
+		}
+	}
+	return Global::Get().gameRoom[Global::Get().gameRoomIdx];
+#else
 	if (Global::Get().gameRoom[Global::Get().gameRoomIdx].m_id == INVALID_ID)
 	{
 		FindNextRoomIdx();
 	}
 	return Global::Get().gameRoom[Global::Get().gameRoomIdx];
+#endif // _DEBUG
 }
 
 inline auto NextRoomIdx()

@@ -20,6 +20,15 @@
     <Filter Include="Natvis">
       <UniqueIdentifier>{8023b4be-7f20-461a-9ee5-15a177ac5937}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\InGameScript">
+      <UniqueIdentifier>{696c85e0-a64a-4ed6-bc82-261e260f1430}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game">
+      <UniqueIdentifier>{53073d20-e92b-4c3b-9f07-31ee1e72eead}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Scripts\DebugUI">
+      <UniqueIdentifier>{d0decef0-eb9d-4266-b3be-90a17ad3db5f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -80,6 +89,21 @@
     </ClInclude>
     <ClInclude Include="UIScript.h">
       <Filter>Source Files\Scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="UIConsole.h">
+      <Filter>Source Files\Scripts\DebugUI</Filter>
+    </ClInclude>
+    <ClInclude Include="GameSetting.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BindPython.h">
+      <Filter>Source Files\InGameScript</Filter>
+    </ClInclude>
+    <ClInclude Include="GameMap.h">
+      <Filter>Source Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="PathFinder.h">
+      <Filter>Source Files\Game</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

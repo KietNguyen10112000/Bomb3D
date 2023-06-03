@@ -4,9 +4,17 @@
 
 #include "imgui/imgui.h"
 
+#include "Global.h"
+#include "UIConsole.h"
+
 using namespace soft;
 
-class UIScript : Traceable<UIScript>, public Script2D
+#include <pybind11/embed.h>
+#include <pybind11/iostream.h>
+
+namespace py = pybind11;
+
+class UIScript : Traceable<UIScript>, public Script2D, public UIConsole
 {
 protected:
 	SCRIPT2D_DEFAULT_METHOD(UIScript);
@@ -17,12 +25,57 @@ protected:
 		Base::Trace(tracer);
 	}
 
-public:
-	virtual void OnGUI()
+	bool m_showedDebugUI = false;
+
+private:
+	void RenderConsole()
 	{
-		ImGui::Begin(u8"Xin chào");
-		ImGui::Button(u8"Bấm");
-		ImGui::End();
+		if (!Global::Get().setting.isOnConsole)
+		{
+			return;
+		}
+
+		UIConsole::RenderConsole(nullptr);
+	}
+
+	void OnShowDebugUI()
+	{
+		Global::Get().setting.isOnConsole = true;
+		Global::Get().setting.playerControlMode = GameSetting::PlayerControlMode::DEBUG;
+	}
+
+	void OnHideDebugUI()
+	{
+		Global::Get().setting.isOnConsole = false;
+		Global::Get().setting.playerControlMode = GameSetting::PlayerControlMode::NONE;
+	}
+
+public:
+	virtual void OnStart() override
+	{
+
+	}
+
+	virtual void OnUpdate(float dt) override
+	{
+		// '`~' key
+		if (Input()->IsKeyPressed(192))
+		{
+			if (m_showedDebugUI)
+			{
+				OnHideDebugUI();
+			}
+			else
+			{
+				OnShowDebugUI();
+			}
+			m_showedDebugUI = !m_showedDebugUI;
+		}
+	}
+
+	virtual void OnGUI() override
+	{
+		RenderConsole();
 	}
 	
 };
