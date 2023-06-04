@@ -156,6 +156,7 @@
     <ClInclude Include="..\Synch\Package.h" />
     <ClInclude Include="BindPython.h" />
     <ClInclude Include="BulletScript.h" />
+    <ClInclude Include="GameConfig.h" />
     <ClInclude Include="GameInit.h" />
     <ClInclude Include="GameMap.h" />
     <ClInclude Include="GameSetting.h" />
@@ -166,6 +167,7 @@
     <ClInclude Include="PlayerScript.h" />
     <ClInclude Include="TAG.h" />
     <ClInclude Include="UIConsole.h" />
+    <ClInclude Include="UIDebugPathFinder.h" />
     <ClInclude Include="UIScript.h" />
   </ItemGroup>
   <ItemGroup>

@@ -6,6 +6,7 @@
 
 #include "Global.h"
 #include "UIConsole.h"
+#include "UIDebugPathFinder.h"
 
 using namespace soft;
 
@@ -14,7 +15,7 @@ using namespace soft;
 
 namespace py = pybind11;
 
-class UIScript : Traceable<UIScript>, public Script2D, public UIConsole
+class UIScript : Traceable<UIScript>, public Script2D, public UIConsole, public UIDebugPathFinder
 {
 protected:
 	SCRIPT2D_DEFAULT_METHOD(UIScript);
@@ -76,6 +77,7 @@ public:
 	virtual void OnGUI() override
 	{
 		RenderConsole();
+		UIDebugPathFinder::Render(m_scene->GetRenderingSystem());
 	}
 	
 };

@@ -97,6 +97,12 @@ private:
 
 		ComsumeAction(scene);
 		scene->LockDt(dt);
+
+		Global::Get().gameMap.m_pathFinder.Update(
+			Global::Get().activeScene->GetIterationCount(), 
+			Global::Get().setting.pathFinderUpdateStep
+		);
+
 		scene->PrevIteration();
 		scene->Iteration();
 

@@ -105,6 +105,12 @@
     <ClInclude Include="PathFinder.h">
       <Filter>Source Files\Game</Filter>
     </ClInclude>
+    <ClInclude Include="UIDebugPathFinder.h">
+      <Filter>Source Files\Scripts\DebugUI</Filter>
+    </ClInclude>
+    <ClInclude Include="GameConfig.h">
+      <Filter>Source Files\Game</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="..\DebugView.natvis">

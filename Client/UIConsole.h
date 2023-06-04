@@ -82,6 +82,8 @@ private:
 	py::scoped_interpreter m_pyGuard{};
 	py::object m_pyGlobal;
 
+	bool m_scrollToBottom = true;
+
 public:
 	inline UIConsole()
 	{
@@ -94,6 +96,7 @@ public:
 		RedirectStdOutput();
 
 		m_pyGlobal = py::globals();
+		BindPython();
 	};
 
 	inline ~UIConsole()
@@ -150,6 +153,7 @@ public:
 
 	void RenderConsole(Scene2D* scene)
 	{
+		ImGui::SetNextWindowPos(ImVec2(5, 5));
 		ImGui::Begin("Console");
 
 		if (ImGui::Button("Run Script"))
@@ -175,6 +179,9 @@ public:
 		{
 			ClearOutput();
 		}
+
+		ImGui::SameLine();
+		ImGui::Checkbox("View last log", &m_scrollToBottom);
 
 		ImGui::Separator();
 
@@ -203,6 +210,11 @@ public:
 			}
 		}
 		ImGui::PopStyleVar();
+
+		if (m_scrollToBottom)
+		{
+			ImGui::SetScrollHereY(1.0f);
+		}
 
 		ImGui::EndChild();
 		ImGui::Separator();

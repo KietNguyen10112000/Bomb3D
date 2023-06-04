@@ -34,6 +34,8 @@ public:
 				m_movable[x + yy] = !isCellBlocked[data[x + yy]];
 			}
 		}
+
+		m_pathFinder.Initialize(m_movable, w, h);
 	}
 
 };

@@ -9,6 +9,12 @@ class PathFinder
 public:
 	constexpr static size_t MAX_SIZE = 512;
 
+	constexpr static int NEIGHBOR_X[] = { 0,0,1,-1,1,-1,1,-1 };
+	constexpr static int NEIGHBOR_Y[] = { 1,-1,0,0,1,-1,-1,1 };
+
+	constexpr static float SQRT_2 = 1.41421356237f;
+	constexpr static float NEIGHBOR_DIST[] = { 1,1,1,1,SQRT_2,SQRT_2,SQRT_2,SQRT_2 };
+
 	struct Cell
 	{
 		int x = 0;
@@ -16,74 +22,171 @@ public:
 		mutable size_t idx = 0;
 
 		Cell() {};
-		Cell(int x, int y) : x(x), y(y)
-		{
-
-		}
-
-		Cell(int x, int y, int width) : x(x), y(y), idx(y* width + x)
-		{
-
-		}
+		Cell(int x, int y) : x(x), y(y) {}
+		Cell(int x, int y, int width) : x(x), y(y), idx(y* width + x) {}
 	};
 
-	constexpr static int NEIGHBOR_X[] = { 0,0,1,-1 };
-	constexpr static int NEIGHBOR_Y[] = { 1,-1,0,0 };
-
+	struct Layer;
 	struct Cmp
 	{
-		PathFinder* finder;
+		Layer* layer;
 
 		inline bool operator() (const Cell& cell1, const Cell& cell2)
 		{
-			return finder->GetDist(cell1) < finder->GetDist(cell2);
+			return layer->GetDist(cell1) > layer->GetDist(cell2);
 		}
 	};
 
-	size_t m_minIteration = 0;
+	struct Layer
+	{
+		PathFinder* pathFinder;
+		//size_t* visited;
+		//float* dist;
+
+		size_t	visited[MAX_SIZE * MAX_SIZE] = {};
+		float	dist[MAX_SIZE * MAX_SIZE] = {};
+		Cell	tempPrev[MAX_SIZE * MAX_SIZE] = {};
+
+		size_t minIteration = 0;
+		std::priority_queue<Cell, std::vector<Cell>, Cmp> queue;
+
+		Layer() {};
+
+		inline void Initialize(PathFinder* finder)
+		{
+			pathFinder = (finder);
+			//visited = (finder->m_visited);
+			//dist = (finder->m_dist);
+			queue = { Cmp{ this }, std::vector<Cell>(8 * KB) };
+			while (!queue.empty()) { queue.pop(); }
+		}
+
+		inline float GetDist(const Cell& cell)
+		{
+			return visited[cell.idx] < minIteration ?
+				std::numeric_limits<std::remove_reference_t<decltype(dist[0])>>::max() : dist[cell.idx];
+		}
+
+		inline void Clear()
+		{
+			while (!queue.empty()) { queue.pop(); }
+			minIteration = 0;
+		}
+
+		inline bool IsFinished() const
+		{
+			return minIteration == 0;
+		}
+	};
+
+	//size_t m_minIteration = 0;
 	size_t m_width = 0;
 	size_t m_height = 0;
 
 	bool* m_movable = nullptr;
 
 	// iteration that path finder reach the call on map
-	size_t	m_visited	[MAX_SIZE * MAX_SIZE] = {};
-	size_t	m_dist		[MAX_SIZE * MAX_SIZE] = {};
+	//size_t	m_visited	[MAX_SIZE * MAX_SIZE] = {};
+	//float	m_dist		[MAX_SIZE * MAX_SIZE] = {};
+	//Cell	m_tempPrev	[MAX_SIZE * MAX_SIZE] = {};
 	Cell	m_prev		[MAX_SIZE * MAX_SIZE] = {};
 
-	std::priority_queue<Cell, std::vector<Cell>, Cmp> m_queue;
+	//std::priority_queue<Cell, std::vector<Cell>, Cmp> m_queue;
 
-	PathFinder() : m_queue(Cmp{ this }, std::vector<Cell>(1024))
+	std::vector<Layer> m_layers;
+	std::deque<Layer*> m_activeLayers;
+	std::vector<Layer*> m_freeLayers;
+
+	PathFinder() : m_activeLayers(16) //: m_queue(Cmp{ this }, std::vector<Cell>(8*KB))
 	{
+		/*while (!m_queue.empty())
+		{
+			m_queue.pop();
+		}*/
+
+		m_layers.resize(16);
+		m_freeLayers.reserve(16);
+		for (auto& layer : m_layers)
+		{
+			layer.Initialize(this);
+			m_freeLayers.push_back(&layer);
+		}
+		m_activeLayers.clear();
 	}
 
-	inline void Setup(size_t iterationCount, bool* movable, size_t w, size_t h, const Cell& startCell)
+	inline auto& NextLayer()
+	{
+		Layer* ret = 0;
+		if (!m_freeLayers.empty())
+		{
+			ret = m_freeLayers.back();
+			m_freeLayers.pop_back();
+		}
+		else
+		{
+			ret = m_activeLayers.front();
+			m_activeLayers.pop_front();
+		}
+
+		m_activeLayers.push_back(ret);
+		return *ret;
+	}
+
+	inline void Initialize(bool* movable, size_t w, size_t h)
 	{
 		m_movable = movable;
-		m_minIteration = iterationCount;
 		m_width = w;
 		m_height = h;
+	}
 
+	inline Layer* Find(size_t iterationCount, const Cell& startCell)
+	{
 		startCell.idx = startCell.y * m_width + startCell.x;
 
-		m_visited[startCell.idx] = iterationCount;
-		m_dist[startCell.idx] = 0;
-		m_prev[startCell.idx] = startCell;
+		if (!m_movable[startCell.idx])
+		{
+			//m_visited[startCell.idx] = m_minIteration;
+			return nullptr;
+		}
 
-		m_queue.push(startCell);
+		auto& layer = NextLayer();
+		layer.Clear();
+
+		layer.visited[startCell.idx] = 0;
+		layer.dist[startCell.idx] = 0;
+		m_prev[startCell.idx] = startCell;
+		layer.tempPrev[startCell.idx] = startCell;
+
+		layer.minIteration = iterationCount;
+		layer.queue.push(startCell);
+		return &layer;
+		//m_queue.push(startCell);
 	}
 
 	// return true if done algorithm
-	inline bool Find(size_t iterationCount, size_t step)
+	inline bool UpdateLayer(Layer* pLayer, size_t iterationCount, size_t step)
 	{
-		assert(iterationCount >= m_minIteration);
+		auto& layer = *pLayer;
 
-		while (!m_queue.empty() && (step--) != 0)
+		iterationCount++;
+		assert(iterationCount > layer.minIteration);
+
+		auto& queue = layer.queue;
+		while (!queue.empty() && step != 0)
 		{
-			auto cur = m_queue.top();
-			m_queue.pop();
+			auto cur = queue.top();
+			queue.pop();
 
-			auto curDist = GetDist(cur);
+			if (layer.visited[cur.idx] > layer.minIteration)
+			{
+				continue;
+			}
+
+			step--;
+			layer.visited[cur.idx] = iterationCount;
+			m_prev[cur.idx] = layer.tempPrev[cur.idx];
+
+			auto curDist = layer.GetDist(cur);
 
 			for (size_t i = 0; i < sizeof(NEIGHBOR_X) / sizeof(NEIGHBOR_X[0]); i++)
 			{
@@ -95,29 +198,35 @@ public:
 					continue;
 				}
 
-				auto altDist = curDist + 1;
-				auto cellDist = GetDist(cell);
+				auto altDist = curDist + NEIGHBOR_DIST[i];
+				auto cellDist = layer.GetDist(cell);
 				if (altDist < cellDist)
 				{
-					m_visited[cell.idx] = iterationCount;
-					m_prev[cell.idx] = cell;
-					m_dist[cell.idx] = altDist;
-					m_queue.push(cell);
+					layer.visited[cell.idx] = layer.minIteration;
+					layer.tempPrev[cell.idx] = cur;
+					layer.dist[cell.idx] = altDist;
+					queue.push(cell);
 				}
 			}
 		}
 
-		if (m_queue.empty())
+		//std::cout << m_queue.size() << "\n";
+		if (queue.empty())
 		{
+			layer.minIteration = 0;
+			m_freeLayers.push_back(&layer);
 			return true;
 		}
 
 		return false;
 	}
 
-	inline size_t GetDist(const Cell& cell)
+	inline void Update(size_t iterationCount, size_t step)
 	{
-		return m_visited[cell.idx] < m_minIteration ? (size_t)(-1) : m_dist[cell.idx];
+		for (auto& layer : m_activeLayers)
+		{
+			UpdateLayer(layer, iterationCount, step);
+		}
 	}
 
 };
