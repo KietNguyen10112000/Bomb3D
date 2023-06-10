@@ -1,12 +1,14 @@
 ﻿#pragma once
 
 #include "Components2D/Script/Script2D.h"
+#include "Objects2D/Physics/Colliders/CircleCollider.h"
 
 #include "imgui/imgui.h"
 
 #include "Global.h"
 #include "UIConsole.h"
 #include "UIDebugPathFinder.h"
+#include "Monster.h"
 
 using namespace soft;
 
@@ -25,6 +27,8 @@ protected:
 	{
 		Base::Trace(tracer);
 	}
+
+	SharedPtr<CircleCollider> m_circleCollider;
 
 	bool m_showedDebugUI = false;
 
@@ -51,10 +55,31 @@ private:
 		Global::Get().setting.playerControlMode = GameSetting::PlayerControlMode::NONE;
 	}
 
+	void SpawnMonster(const Vec2& pos)
+	{
+		std::cout << "SpawnMonster\n";
+
+		auto monster	= mheap::New<GameObject2D>(GameObject2D::DYNAMIC);
+		auto renderer	= monster->NewComponent<SpritesRenderer>();
+		auto physics	= monster->NewComponent<RigidBody2D>(RigidBody2D::DYNAMIC, m_circleCollider);
+		auto script		= monster->NewComponent<Monster>();
+
+		renderer->Load("ui/circle-red.png", {}, Vec2(60,60));
+		renderer->Sprite(0).SetAnchorPoint({ 0.5f,0.5f });
+		
+		renderer->Load("ui/circle-green.png", {}, Vec2(60, 60));
+		renderer->Sprite(1).SetAnchorPoint({ 0.5f,0.5f });
+
+		renderer->SetSprite(0);
+		renderer->ClearAABB();
+
+		m_scene->AddObject(monster);
+	}
+
 public:
 	virtual void OnStart() override
 	{
-
+		m_circleCollider = MakeShared<CircleCollider>(Vec2(0,0), 30.0f);
 	}
 
 	virtual void OnUpdate(float dt) override
@@ -71,6 +96,11 @@ public:
 				OnShowDebugUI();
 			}
 			m_showedDebugUI = !m_showedDebugUI;
+		}
+
+		if (Global::Get().setting.isOnRClickToSpawnMonster && Input()->IsKeyPressed('P'))
+		{
+			SpawnMonster({0,0});
 		}
 	}
 

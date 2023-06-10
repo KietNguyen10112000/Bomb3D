@@ -33,12 +33,16 @@ public:
 		sysm.attr("stderr") = _stderr_buffer;
 	}
 	std::string stdoutString() {
+		auto ret = py::str(_stdout_buffer.attr("getvalue")());
+		_stdout_buffer.attr("truncate")(0);
 		_stdout_buffer.attr("seek")(0);
-		return py::str(_stdout_buffer.attr("read")());
+		return ret;
 	}
 	std::string stderrString() {
+		auto ret = py::str(_stderr_buffer.attr("getvalue")());
+		_stderr_buffer.attr("truncate")(0);
 		_stderr_buffer.attr("seek")(0);
-		return py::str(_stderr_buffer.attr("read")());
+		return ret;
 	}
 	~PyStdErrOutStreamRedirect() {
 		auto sysm = py::module::import("sys");
@@ -69,10 +73,13 @@ private:
 	//decltype(stdout) m_newStdOut = 0;
 	//decltype(stderr) m_newStdErr = 0;
 
-	std::vector<std::string> m_outHistory;
-	std::vector<std::string> m_errHistory;
+	//std::deque<std::string> m_outHistory;
+	//std::deque<std::string> m_errHistory;
 	// text, error?
-	std::vector<std::pair<int, int>> m_logHistoryView;
+	std::deque<std::pair<int, std::string>> m_logHistoryView;
+
+	size_t m_logBufferSize = 1024;
+
 	//std::vector<std::string> m_commandHistory;
 
 
@@ -81,6 +88,7 @@ private:
 
 	py::scoped_interpreter m_pyGuard{};
 	py::object m_pyGlobal;
+	PyStdErrOutStreamRedirect m_pyOut{};
 
 	bool m_scrollToBottom = true;
 
@@ -97,6 +105,8 @@ public:
 
 		m_pyGlobal = py::globals();
 		BindPython();
+
+		pybind11::gil_scoped_release release;
 	};
 
 	inline ~UIConsole()
@@ -106,6 +116,12 @@ public:
 
 	inline void RedirectStdOutput()
 	{
+		if (!Global::Get().setting.isCaptureSTDCout)
+		{
+			return;
+		}
+		//return;
+
 		m_coutbuf = std::cout.rdbuf();
 		m_cerrbuf = std::cerr.rdbuf();
 
@@ -115,21 +131,25 @@ public:
 
 	inline void RestoreStdOutput()
 	{
+		if (!Global::Get().setting.isCaptureSTDCout)
+		{
+			return;
+		}
+		//return;
+
 		std::cout.rdbuf(m_coutbuf);
 		std::cerr.rdbuf(m_cerrbuf);
 
 		auto outstr = m_outBuf.str();
 		if (!outstr.empty())
 		{
-			m_logHistoryView.push_back({ m_outHistory.size(), 0 });
-			m_outHistory.push_back(outstr);
+			m_logHistoryView.push_back({ 0, outstr });
 		}
 
 		auto errstr = m_errBuf.str();
 		if (!errstr.empty())
 		{
-			m_logHistoryView.push_back({ m_errHistory.size(), 1 });
-			m_errHistory.push_back(errstr);
+			m_logHistoryView.push_back({ 1, errstr });
 		}
 
 		m_outBuf.str("");
@@ -138,8 +158,6 @@ public:
 
 	inline void ClearOutput()
 	{
-		m_outHistory.clear();
-		m_errHistory.clear();
 		m_logHistoryView.clear();
 
 		m_outBuf.str("");
@@ -156,21 +174,36 @@ public:
 		ImGui::SetNextWindowPos(ImVec2(5, 5));
 		ImGui::Begin("Console");
 
-		if (ImGui::Button("Run Script"))
 		{
-			m_resizedInput = &m_input[0];
+			pybind11::gil_scoped_acquire acquire;
 
-			//py::scoped_interpreter guard{};
-			PyStdErrOutStreamRedirect out{};
-			try {
-				py::exec(m_resizedInput.c_str());
+			if (ImGui::Button("Run Script"))
+			{
+				m_resizedInput = &m_input[0];
+
+				//py::scoped_interpreter guard{};
+				try {
+					py::exec(m_resizedInput.c_str());
+				}
+				catch (py::error_already_set& eas) {
+					std::cerr << eas.what() << "\n";
+					//eas.trace();
+				}
 			}
-			catch (py::error_already_set& eas) {
-				std::cerr << eas.what() << "\n";
-				//eas.trace();
+
+			auto outStr = m_pyOut.stdoutString();
+			auto errStr = m_pyOut.stderrString();
+			if (!outStr.empty())
+			{
+				m_outBuf << outStr;
 			}
-			m_outBuf << out.stdoutString();
-			m_errBuf << out.stderrString();
+
+			if (!errStr.empty())
+			{
+				m_errBuf << errStr;
+			}
+
+			pybind11::gil_scoped_release release;
 		}
 
 		ImGui::SameLine();
@@ -182,11 +215,21 @@ public:
 
 		ImGui::SameLine();
 		ImGui::Checkbox("View last log", &m_scrollToBottom);
+		//ImGui::SameLine();
+		//ImGui::Checkbox("Capture std::cout", &Global::Get().setting.isCaptureSTDCout);
 
 		ImGui::Separator();
 
 		RestoreStdOutput();
 		RedirectStdOutput();
+
+		if (m_logHistoryView.size() > m_logBufferSize)
+		{
+			while (m_logHistoryView.size() > m_logBufferSize)
+			{
+				m_logHistoryView.pop_front();
+			}
+		}
 
 		const float height = ImGui::GetWindowHeight() / 2.0f;
 		ImGui::BeginChild("ScrollingRegion", ImVec2(0, height), false, ImGuiWindowFlags_HorizontalScrollbar);
@@ -194,15 +237,13 @@ public:
 		ImGui::PushStyleVar(ImGuiStyleVar_ItemSpacing, ImVec2(4, 1)); // Tighten spacing
 		for (auto& log : m_logHistoryView)
 		{
-			auto error = log.second;
-
-			auto* list = (!error) ? &m_outHistory : &m_errHistory;
+			auto error = log.first;
 
 			if (error)
 			{
 				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 0.4f, 0.4f, 1.0f));
 			}
-			ImGui::TextUnformatted((*list)[log.first].c_str());
+			ImGui::TextUnformatted(log.second.c_str());
 
 			if (error)
 			{
@@ -221,7 +262,7 @@ public:
 
 		//(scriptEngine ? 120 : 80)
 		ImGui::InputTextMultiline("##source", &m_input[0], INPUT_BUF_SIZE,
-			ImVec2(-FLT_MIN, height - 100), ImGuiInputTextFlags_AllowTabInput);
+			ImVec2(-FLT_MIN, height - 50), ImGuiInputTextFlags_AllowTabInput);
 
 		ImGui::End();
 	}

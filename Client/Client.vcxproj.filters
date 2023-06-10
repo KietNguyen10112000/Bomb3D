@@ -29,6 +29,9 @@
     <Filter Include="Source Files\Scripts\DebugUI">
       <UniqueIdentifier>{d0decef0-eb9d-4266-b3be-90a17ad3db5f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Scripts\Monsters">
+      <UniqueIdentifier>{09ac33a3-1ed6-4b0d-828c-9a30c81caba5}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -110,6 +113,9 @@
     </ClInclude>
     <ClInclude Include="GameConfig.h">
       <Filter>Source Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="Monster.h">
+      <Filter>Source Files\Scripts\Monsters</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

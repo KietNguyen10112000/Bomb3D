@@ -39,6 +39,8 @@ public:
 
 		ByteStream*				sendingPkg = nullptr;
 
+		size_t					minIteration = 0;
+
 		Spinlock				sendQueueLock;
 		bool					matched = false;
 	};
@@ -140,6 +142,7 @@ public:
 		sendPkg.Pack();
 		for (auto& client : m_clients)
 		{
+			client.minIteration = 0;
 			if (!client.conn.IsDisconnected())
 			{
 				//m_sender.SendSynch(m_sendPkg, client.conn);
@@ -161,25 +164,25 @@ public:
 		return true;
 	}
 
-	inline void ProcessClientStream(ByteStreamRead& stream)
+	inline void ProcessClientStream(ByteStreamRead& stream, ID id)
 	{
-		size_t minIteration = 0;
-
+		//size_t minIteration = 0;
+		auto& client = m_clients[id];
 		while (!stream.IsEmpty())
 		{
 			auto clientIteration = stream.Get<size_t>();
 			auto actionCount = stream.Get<uint32_t>();
 
-			if (minIteration == 0)
+			if (client.minIteration == 0)
 			{
-				minIteration = clientIteration;
+				client.minIteration = clientIteration;
 			}
 
 #ifdef _DEBUG
-			if (minIteration <= clientIteration)
+			if (client.minIteration <= clientIteration)
 			{
 				int x = 3;
-				assert(minIteration <= clientIteration);
+				assert(client.minIteration <= clientIteration);
 			}
 
 			if (clientIteration <= m_iterationCount)
@@ -189,7 +192,7 @@ public:
 			}
 #endif // _DEBUG
 
-			auto offsetIteration = clientIteration - minIteration;
+			auto offsetIteration = clientIteration - client.minIteration;
 
 			/*if (offsetIteration >= NUM_BUFFERED_TICKS)
 			{
@@ -227,6 +230,7 @@ public:
 	{
 		ConsumeActions();
 
+		size_t i = 0;
 		for (auto& client : m_clients)
 		{
 			if (!client.conn.IsDisconnected())
@@ -237,7 +241,7 @@ public:
 					// success
 
 					auto clientStream = client.receiver.GetStream();
-					ProcessClientStream(clientStream);
+					ProcessClientStream(clientStream, i);
 				}
 				else if (recvRet == PackageReceiver::ERCODE::CONNECTION_ERROR)
 				{
@@ -245,6 +249,7 @@ public:
 					m_clientsCount--;
 				}
 			}
+			i++;
 		}
 
 		if (m_clientsCount == 0)
@@ -345,6 +350,7 @@ public:
 	{
 		for (auto& client : m_clients)
 		{
+			client.minIteration = 0;
 			client.matched = false;
 			client.sendQueueLock.lock();
 			client.sendingPkg = nullptr;

@@ -162,6 +162,7 @@ public:
 		if (Global::Get().userId == m_userId)
 		{
 			m_cam = GetObject()->Child(childIdx++)->GetComponent<Camera2D>();
+			Global::Get().cam = m_cam.Get();
 		}
 
 		m_redLine = GetObject()->Child(childIdx++);

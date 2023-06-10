@@ -12,6 +12,11 @@ using namespace soft;
 
 class GameLoopHandler;
 
+namespace soft 
+{
+	class Camera2D;
+}
+
 struct Global
 {
 	static Global* s_instance;
@@ -34,6 +39,7 @@ struct Global
 	Scene2D* activeScene;
 	GameSetting setting;
 	GameMap gameMap;
+	Camera2D* cam;
 
 	inline void ExecuteAction(Action* action)
 	{

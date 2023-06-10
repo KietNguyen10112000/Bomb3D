@@ -86,7 +86,7 @@ public:
 	bool* m_movable = nullptr;
 
 	// iteration that path finder reach the call on map
-	//size_t	m_visited	[MAX_SIZE * MAX_SIZE] = {};
+	size_t	m_visited	[MAX_SIZE * MAX_SIZE] = {};
 	//float	m_dist		[MAX_SIZE * MAX_SIZE] = {};
 	//Cell	m_tempPrev	[MAX_SIZE * MAX_SIZE] = {};
 	Cell	m_prev		[MAX_SIZE * MAX_SIZE] = {};
@@ -184,7 +184,12 @@ public:
 
 			step--;
 			layer.visited[cur.idx] = iterationCount;
-			m_prev[cur.idx] = layer.tempPrev[cur.idx];
+
+			if (layer.minIteration > m_visited[cur.idx])
+			{
+				m_prev[cur.idx] = layer.tempPrev[cur.idx];
+				m_visited[cur.idx] = layer.minIteration;
+			}
 
 			auto curDist = layer.GetDist(cur);
 

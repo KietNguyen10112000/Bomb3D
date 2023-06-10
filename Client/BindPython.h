@@ -38,8 +38,13 @@ PYBIND11_EMBEDDED_MODULE(game, m) {
                 PathFinder::Cell(x, y)
             );
 
+            if (!layer)
+            {
+                return;
+            }
+
             auto passingHandle = mheap::New<Scene2D::TimeHandle>();
-            auto handle = Global::Get().activeScene->SetInterval(0.32f,
+            auto handle = Global::Get().activeScene->SetInterval(1.0f,
                 [layer](const Handle<Scene2D::TimeHandle>& handle)
                 {
                     if (layer->IsFinished())
@@ -69,6 +74,12 @@ PYBIND11_EMBEDDED_MODULE(game, m) {
 
 PYBIND11_EMBEDDED_MODULE(engine, m) {
     class _Engine {};
+
+    py::class_<Scene2D::TimeHandle>(m, "TimeHandle")
+        .def(py::init<ID, ID>())
+        .def_readwrite("id", &Scene2D::TimeHandle::id)
+        .def_readwrite("uid", &Scene2D::TimeHandle::uid);
+
     m.def("setTimeout", [](std::function<void()>& callback, int delay)
             {
                 Global::Get().activeScene->SetTimeout(delay / 1000.0f,
@@ -77,6 +88,25 @@ PYBIND11_EMBEDDED_MODULE(engine, m) {
                         callback();
                     }
                 );
+            }
+        );
+
+    m.def("setInterval", [](std::function<void()>& callback, int delay)
+            {
+                auto id = Global::Get().activeScene->SetInterval(delay / 1000.0f,
+                    [callback]()
+                    {
+                        callback();
+                    }
+                );
+
+                return id;
+            }
+        );
+
+    m.def("clearInterval", [](Scene2D::TimeHandle& handle)
+            {
+                Global::Get().activeScene->ClearInterval(handle);
             }
         );
 }
