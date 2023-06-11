@@ -12,12 +12,12 @@
 
 using namespace soft;
 
-#include <pybind11/embed.h>
-#include <pybind11/iostream.h>
+//#include <pybind11/embed.h>
+//#include <pybind11/iostream.h>
 
-namespace py = pybind11;
+//namespace py = pybind11;
 
-class UIScript : Traceable<UIScript>, public Script2D, public UIConsole, public UIDebugPathFinder
+class UIScript : Traceable<UIScript>, public Script2D, public UIDebugPathFinder
 {
 protected:
 	SCRIPT2D_DEFAULT_METHOD(UIScript);
@@ -28,19 +28,32 @@ protected:
 		Base::Trace(tracer);
 	}
 
+	UIConsole* m_console = nullptr;
 	SharedPtr<CircleCollider> m_circleCollider;
 
 	bool m_showedDebugUI = false;
 
+public:
+	UIScript()
+	{
+		m_console = UIConsole::New();
+	}
+
+	~UIScript()
+	{
+		UIConsole::Delete(m_console);
+	}
+
 private:
 	void RenderConsole()
 	{
+		m_console->m_isCaptureStdOut = Global::Get().setting.isCaptureSTDCout;
 		if (!Global::Get().setting.isOnConsole)
 		{
 			return;
 		}
 
-		UIConsole::RenderConsole(nullptr);
+		m_console->RenderConsole(nullptr);
 	}
 
 	void OnShowDebugUI()
@@ -57,6 +70,11 @@ private:
 
 	void SpawnMonster(const Vec2& pos)
 	{
+		if (!Global::Get().gameMap.IsMovable(pos))
+		{
+			return;
+		}
+
 		std::cout << "SpawnMonster\n";
 
 		auto monster	= mheap::New<GameObject2D>(GameObject2D::DYNAMIC);
@@ -73,6 +91,7 @@ private:
 		renderer->SetSprite(0);
 		renderer->ClearAABB();
 
+		monster->Position() = pos;
 		m_scene->AddObject(monster);
 	}
 
@@ -100,7 +119,10 @@ public:
 
 		if (Global::Get().setting.isOnRClickToSpawnMonster && Input()->IsKeyPressed('P'))
 		{
-			SpawnMonster({0,0});
+			auto& cursorPos = Input()->GetCursor().position;
+			auto center = Global::Get().cam->GetWorldPosition(Vec2(cursorPos.x, cursorPos.y),
+				Input()->GetWindowWidth(), Input()->GetWindowHeight());
+			SpawnMonster(center);
 		}
 	}
 

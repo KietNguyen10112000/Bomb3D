@@ -146,6 +146,7 @@
     <ClCompile Include="..\GameActions\UserInputAction.cpp" />
     <ClCompile Include="GameInit.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="UIConsole.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\GameActions\GameActionConfig.h" />

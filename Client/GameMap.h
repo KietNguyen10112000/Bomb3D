@@ -38,4 +38,12 @@ public:
 		m_pathFinder.Initialize(m_movable, w, h);
 	}
 
+	inline bool IsMovable(const Vec2& pos) const
+	{
+		auto x = (size_t)std::floor(pos.x / (float)GameConfig::CELL_SIZE);
+		auto y = (size_t)std::floor(pos.y / (float)GameConfig::CELL_SIZE);
+
+		return m_movable[y * m_width + x];
+	}
+
 };

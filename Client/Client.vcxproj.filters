@@ -49,6 +49,9 @@
     <ClCompile Include="GameInit.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="UIConsole.cpp">
+      <Filter>Source Files\Scripts\DebugUI</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="PlayerScript.h">

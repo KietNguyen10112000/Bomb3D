@@ -16,22 +16,25 @@ protected:
 	}
 
 	SpritesRenderer* m_renderer;
+	RigidBody2D* m_body;
 	size_t m_collisionCount = 0;
 
 public:
 	virtual void OnStart() override
 	{
 		m_renderer = GetObject()->GetComponent<SpritesRenderer>().Get();
+		m_body = GetObject()->GetComponent<RigidBody2D>().Get();
 	}
 
 	virtual void OnUpdate(float dt) override
 	{
-		auto& cursorPos = Input()->GetCursor().position;
-		auto center = Global::Get().cam->GetWorldPosition(Vec2(cursorPos.x, cursorPos.y),
-			Input()->GetWindowWidth(), Input()->GetWindowHeight());
+		auto dir = Global::Get().gameMap.m_pathFinder.GetDir(Position());
+		if (dir == Vec2::ZERO)
+		{
+			m_scene->RemoveObject(GetObject());
+		}
 
-		if (!Global::Get().setting.isOnConsole)
-			Position() = center;
+		Position() += dir * 100.0f * dt;
 
 		//std::cout << "pos: " << Position().x << ", " << Position().y << "\n";
 
