@@ -17,7 +17,7 @@ protected:
 
 	SpritesRenderer* m_renderer;
 	RigidBody2D* m_body;
-	size_t m_collisionCount = 0;
+	int m_collisionCount = 0;
 
 public:
 	virtual void OnStart() override
@@ -38,6 +38,7 @@ public:
 
 		//std::cout << "pos: " << Position().x << ", " << Position().y << "\n";
 
+		assert(m_collisionCount >= 0);
 		if (m_collisionCount)
 		{
 			m_renderer->SetSprite(0);
