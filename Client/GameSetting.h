@@ -14,5 +14,5 @@ struct GameSetting
 	bool					isOnRClickToSpawnMonster		= true;
 	bool					isCaptureSTDCout				= false;
 	size_t					debugPathfinderLayer			= 0;
-	size_t					pathFinderUpdateStep			= 1;
+	size_t					pathFinderUpdateStep			= 500;
 };

@@ -25,6 +25,11 @@ public:
 		Cell() {};
 		Cell(int x, int y) : x(x), y(y) {}
 		Cell(int x, int y, int width) : x(x), y(y), idx(y* width + x) {}
+
+		inline bool operator!=(const Cell& v) const
+		{
+			return x != v.x || y != v.y;
+		}
 	};
 
 	struct Layer;
@@ -240,13 +245,58 @@ public:
 	{
 		auto x = (size_t)std::floor(pos.x / (float)GameConfig::CELL_SIZE);
 		auto y = (size_t)std::floor(pos.y / (float)GameConfig::CELL_SIZE);
-		auto& prev = m_prev[y * m_width + x];
+
+		auto idx = y * m_width + x;
+
+		if (!m_movable[idx])
+		{
+			return Vec2(0, 0);
+		}
+
+		auto& prev = m_prev[idx];
 		Vec2 dir = Vec2((float)prev.x - (float)x, (float)prev.y - (float)y);
 		if (dir.x == 0 && dir.y == 0)
 		{
 			return dir;
 		}
 		return dir.Normalize();
+	}
+
+	inline Vec2 GetDir(const Cell& cell) const
+	{
+		auto x = cell.x;
+		auto y = cell.y;
+		auto idx = y * m_width + x;
+
+		if (!m_movable[idx])
+		{
+			return Vec2(0, 0);
+		}
+
+		auto& prev = m_prev[idx];
+		Vec2 dir = Vec2((float)prev.x - (float)x, (float)prev.y - (float)y);
+		if (dir.x == 0 && dir.y == 0)
+		{
+			return dir;
+		}
+		return dir.Normalize();
+	}
+
+	inline auto& GetParentCell(const Vec2& pos) const
+	{
+		auto x = (size_t)std::floor(pos.x / (float)GameConfig::CELL_SIZE);
+		auto y = (size_t)std::floor(pos.y / (float)GameConfig::CELL_SIZE);
+
+		auto idx = y * m_width + x;
+		return m_prev[idx];
+	}
+
+	inline auto GetCell(const Vec2& pos) const
+	{
+		auto x = (size_t)std::floor(pos.x / (float)GameConfig::CELL_SIZE);
+		auto y = (size_t)std::floor(pos.y / (float)GameConfig::CELL_SIZE);
+
+		return Cell(x, y, m_width);
 	}
 
 };
