@@ -120,6 +120,9 @@
     <ClInclude Include="Monster.h">
       <Filter>Source Files\Scripts\Monsters</Filter>
     </ClInclude>
+    <ClInclude Include="DebugRenderer.h">
+      <Filter>Source Files\Renderers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="..\DebugView.natvis">

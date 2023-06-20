@@ -7,7 +7,6 @@
 
 #include "Global.h"
 #include "UIConsole.h"
-#include "UIDebugPathFinder.h"
 #include "Monster.h"
 
 using namespace soft;
@@ -17,9 +16,11 @@ using namespace soft;
 
 //namespace py = pybind11;
 
-class UIScript : Traceable<UIScript>, public Script2D, public UIDebugPathFinder
+class UIScript : Traceable<UIScript>, public Script2D
 {
 protected:
+	static constexpr size_t MINIMAP_SIZE = 256;
+
 	SCRIPT2D_DEFAULT_METHOD(UIScript);
 	using Base = Script2D;
 	TRACEABLE_FRIEND();
@@ -33,10 +34,18 @@ protected:
 
 	bool m_showedDebugUI = false;
 
+	sf::RenderTexture m_miniMapRT;
+	sf::RectangleShape m_miniMapBlock;
+	sf::Sprite m_miniMap;
+
 public:
 	UIScript()
 	{
 		m_console = UIConsole::New();
+		m_miniMapRT.create(MINIMAP_SIZE, MINIMAP_SIZE);
+		m_miniMap.setTexture(m_miniMapRT.getTexture());
+		m_miniMap.setPosition(10, 600 - MINIMAP_SIZE / 2 - 10);
+		RenderMiniMap();
 	}
 
 	~UIScript()
@@ -45,6 +54,32 @@ public:
 	}
 
 private:
+	void RenderMiniMap()
+	{
+		m_miniMapRT.clear({ 0,0,0,100 });
+
+		auto map = Global::Get().gameMap.m_movable;
+		auto h = Global::Get().gameMap.m_height;
+		auto w = Global::Get().gameMap.m_width;
+
+		auto cellSize = MINIMAP_SIZE / (float)w;
+		m_miniMapBlock.setSize(sf::Vector2f(MINIMAP_SIZE / (float)w, MINIMAP_SIZE / (float)h));
+		m_miniMapBlock.setFillColor({ 255,255,255,128 });
+
+		for (size_t y = 0; y < h; y++)
+		{
+			for (size_t x = 0; x < w; x++)
+			{
+				auto v = map[y * w + x];
+				if (!v)
+				{
+					m_miniMapBlock.setPosition({ x * cellSize, MINIMAP_SIZE - y * cellSize - cellSize });
+					m_miniMapRT.draw(m_miniMapBlock);
+				}
+			}
+		}
+	}
+
 	void RenderConsole()
 	{
 		m_console->m_isCaptureStdOut = Global::Get().setting.isCaptureSTDCout;
@@ -91,6 +126,8 @@ private:
 		renderer->SetSprite(0);
 		renderer->ClearAABB();
 
+		physics->CollisionMask() = (1ull << 2);
+
 		monster->Position() = pos;
 		m_scene->AddObject(monster);
 	}
@@ -128,8 +165,19 @@ public:
 
 	virtual void OnGUI() override
 	{
+		auto& window = Graphics2D::Get()->m_window;
+		window.draw(m_miniMap);
+
+		auto mapSize = Global::Get().gameMap.m_height;
+
+		m_miniMapBlock.setFillColor({ 0,255,0,128 });
+		auto playerPos = Global::Get().GetMyPlayer()->Position();
+		auto miniMapPos = (playerPos / (float)(mapSize * GameConfig::CELL_SIZE)) * (float)MINIMAP_SIZE;
+		m_miniMapBlock.setPosition(reinterpret_cast<sf::Vector2f&>(miniMapPos) + m_miniMap.getPosition());
+		window.draw(m_miniMapBlock);
+
 		RenderConsole();
-		UIDebugPathFinder::Render(m_scene->GetRenderingSystem());
+		//UIDebugPathFinder::Render(m_scene->GetRenderingSystem());
 	}
 	
 };

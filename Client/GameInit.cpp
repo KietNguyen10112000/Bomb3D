@@ -1,13 +1,15 @@
 #include "Engine/Engine.h"
 #include "Engine/ENGINE_EVENT.h"
 
+#include "Components2D/Rendering/AnimatedSpritesRenderer.h"
+
 #include "PlayerScript.h"
 #include "UIScript.h"
 #include "MapRenderer.h"
 
 #include "GameInit.h"
 
-#include "Components2D/Rendering/AnimatedSpritesRenderer.h"
+#include "DebugRenderer.h"
 
 using namespace soft;
 
@@ -69,7 +71,10 @@ void AddPlayer(Scene2D* scene, ID id, const Vec2& pos, size_t width, size_t heig
 	sprites->Load(String::Format("PlayerDOWN_{}.png", id), AARect(), Vec2(50, 50));
 	sprites->Load(String::Format("PlayerLEFT_{}.png", id), AARect(), Vec2(50, 50));
 	sprites->Load(String::Format("PlayerRIGHT_{}.png", id), AARect(), Vec2(50, 50));
-	player->NewComponent<PlayerScript>()->SetUserId(id);
+
+	auto script = player->NewComponent<PlayerScript>();
+	script->SetUserId(id);
+	Global::Get().players[id] = script.Get();
 
 	auto cellCollider = MakeShared<AARectCollider>(AARect({ 0,0 }, { 50,50 }), Vec2(5, 5));
 	player->NewComponent<RigidBody2D>(RigidBody2D::KINEMATIC, cellCollider)
@@ -159,6 +164,7 @@ void AddUINode(Scene2D* scene)
 {
 	auto ui = mheap::New<GameObject2D>(GameObject2D::GHOST);
 	ui->NewComponent<UIScript>();
+	ui->NewComponent<DebugRenderer>();
 	scene->AddObject(ui);
 }
 

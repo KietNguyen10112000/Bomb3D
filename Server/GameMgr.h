@@ -11,7 +11,7 @@ using namespace soft;
 class GameMgr
 {
 public:
-	constexpr static size_t MAP_SIZE = 10;
+	constexpr static size_t MAP_SIZE = 6;
 
 	inline void GenerateMap(
 		byte* mapValues, uint32_t& outputWidth, uint32_t& outputHeight,

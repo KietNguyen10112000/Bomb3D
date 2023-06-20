@@ -157,6 +157,7 @@
     <ClInclude Include="..\Synch\Package.h" />
     <ClInclude Include="BindPython.h" />
     <ClInclude Include="BulletScript.h" />
+    <ClInclude Include="DebugRenderer.h" />
     <ClInclude Include="GameConfig.h" />
     <ClInclude Include="GameInit.h" />
     <ClInclude Include="GameMap.h" />

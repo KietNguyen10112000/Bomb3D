@@ -11,6 +11,7 @@
 using namespace soft;
 
 class GameLoopHandler;
+class PlayerScript;
 
 namespace soft 
 {
@@ -40,6 +41,12 @@ struct Global
 	GameSetting setting;
 	GameMap gameMap;
 	Camera2D* cam;
+	PlayerScript* players[10] = {};
+
+	inline auto GetMyPlayer()
+	{
+		return players[userId];
+	}
 
 	inline void ExecuteAction(Action* action)
 	{
