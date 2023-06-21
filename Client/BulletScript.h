@@ -86,6 +86,14 @@ public:
 		if (queryRet)
 		{
 			auto& obj = queryRet->objectResult[0];
+
+			// monster
+			if (obj.object->Tag() == 10)
+			{
+				auto body = obj.object->GetComponentRaw<Body2D>();
+				body->ApplyForce({}, m_dir * m_speed);
+			}
+
 			if (obj.object->Tag() != TAG::PLAYER)
 			{
 				m_scene->RemoveObject(GetObject());

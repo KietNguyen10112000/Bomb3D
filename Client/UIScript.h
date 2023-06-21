@@ -129,6 +129,7 @@ private:
 		physics->CollisionMask() = (1ull << 2);
 
 		monster->Position() = pos;
+		monster->Tag() = 10;
 		m_scene->AddObject(monster);
 	}
 
