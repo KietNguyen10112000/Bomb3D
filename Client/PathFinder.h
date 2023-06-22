@@ -246,6 +246,11 @@ public:
 		auto x = (size_t)std::floor(pos.x / (float)GameConfig::CELL_SIZE);
 		auto y = (size_t)std::floor(pos.y / (float)GameConfig::CELL_SIZE);
 
+		if (x >= m_width || y >= m_height || x < 0 || y < 0)
+		{
+			return Vec2(0, 0);
+		}
+
 		auto idx = y * m_width + x;
 
 		if (!m_movable[idx])

@@ -85,15 +85,22 @@ public:
 
 		if (queryRet)
 		{
-			auto& obj = queryRet->objectResult[0];
-
-			// monster
-			if (obj.object->Tag() == 10)
+			auto v = m_speed;
+			for (auto& obj : queryRet->objectResult)
 			{
-				auto body = obj.object->GetComponentRaw<Body2D>();
-				body->ApplyForce({}, m_dir * m_speed);
+				// monster
+				if (obj.object->Tag() == 10)
+				{
+					auto body = obj.object->GetComponentRaw<RigidBody2D>();
+					if (std::abs(body->m_desc.dynamic.v.Length()) < 500.0f)
+					{
+						body->ApplyForce({}, m_dir * v);
+						v = v * 0.8f;
+					}
+				}
 			}
-
+			
+			auto& obj = queryRet->objectResult[0];
 			if (obj.object->Tag() != TAG::PLAYER)
 			{
 				m_scene->RemoveObject(GetObject());

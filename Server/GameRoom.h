@@ -77,6 +77,8 @@ public:
 	void (*m_abortCallback)(void*) = nullptr;
 	void *m_abortCallbackUserPtr = nullptr;
 
+	bool					m_isWaitForSendLock			= false;
+
 	inline void FirstResetIterationStreams()
 	{
 		auto iter = m_iterationCount;
@@ -115,10 +117,16 @@ public:
 		m_lastSynchIteration = m_iterationCount + 1;
 	}
 
-	inline void SynchAllClients()
+	inline bool SynchAllClients()
 	{
 		auto& sendLock = m_sendPkgsLock[m_sendPkgIdx];
-		sendLock.lock_no_check_own_thread();
+
+		if (!sendLock.try_lock())
+		{
+			return true;
+		}
+
+		//sendLock.lock_no_check_own_thread();
 
 		auto& sendPkg = m_sendPkgs[m_sendPkgIdx];
 		sendPkg.Clean();
@@ -151,6 +159,8 @@ public:
 		}
 
 		ResetIterationStreams();
+
+		return false;
 	}
 
 	// check if user send a valid action
@@ -284,6 +294,11 @@ public:
 
 	inline void FixedIteration(float dt)
 	{
+		if (m_isWaitForSendLock)
+		{
+			m_isWaitForSendLock = SynchAllClients();
+		}
+
 		if (!m_isMatchedSuccess)
 		{
 			ProcessAllClients();
@@ -294,7 +309,12 @@ public:
 
 		if (m_iterationCount % NUM_TICKS_PER_SEND == 0)
 		{
-			SynchAllClients();
+			m_isWaitForSendLock = SynchAllClients();
+		}
+
+		if (m_isWaitForSendLock)
+		{
+			return;
 		}
 
 		Update(dt);
