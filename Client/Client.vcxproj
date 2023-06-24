@@ -144,7 +144,10 @@
     <ClCompile Include="..\GameActions\GameActionConfig.cpp" />
     <ClCompile Include="..\GameActions\MatchStartAction.cpp" />
     <ClCompile Include="..\GameActions\UserInputAction.cpp" />
+    <ClCompile Include="BindPython.cpp" />
     <ClCompile Include="GameInit.cpp" />
+    <ClCompile Include="InGameAPI.cpp" />
+    <ClCompile Include="ItemIconLoader.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="UIConsole.cpp" />
   </ItemGroup>
@@ -164,10 +167,13 @@
     <ClInclude Include="GameSetting.h" />
     <ClInclude Include="Global.h" />
     <ClInclude Include="GameLoopHandler.h" />
+    <ClInclude Include="InGameAPI.h" />
+    <ClInclude Include="ItemIconLoader.h" />
     <ClInclude Include="MapRenderer.h" />
     <ClInclude Include="Monster.h" />
     <ClInclude Include="PathFinder.h" />
     <ClInclude Include="PlayerScript.h" />
+    <ClInclude Include="Preload.h" />
     <ClInclude Include="TAG.h" />
     <ClInclude Include="UIConsole.h" />
     <ClInclude Include="UIDebugPathFinder.h" />

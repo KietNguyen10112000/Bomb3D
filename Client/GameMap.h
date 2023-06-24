@@ -3,9 +3,17 @@
 
 #include "PathFinder.h"
 
+#include "GameActions/MatchStartAction.h"
+
 class GameMap
 {
 public:
+	struct Cell
+	{
+		int value;
+		int itemId;
+	};
+
 	constexpr static size_t MAX_SIZE = PathFinder::MAX_SIZE;
 
 	size_t m_width = 0;
@@ -14,10 +22,19 @@ public:
 	// 1 - movable, 0 - unmovable
 	bool m_movable[MAX_SIZE * MAX_SIZE] = {};
 
+	Cell m_cells[MAX_SIZE * MAX_SIZE] = {};
+
 	PathFinder m_pathFinder;
 
-	inline void Initialize(size_t w, size_t h, uint8_t* data, uint8_t* blockCells, uint8_t blockCellCount)
+	inline void Initialize(MatchStartAction* matchStart)
 	{
+		auto blockCellCount = matchStart->m_numBlockCell;
+		auto blockCells = matchStart->m_blockCellValues;
+		auto w = matchStart->m_width;
+		auto h = matchStart->m_height;
+		auto mapValues = matchStart->m_map;
+		auto itemIds = matchStart->m_mapItems;
+
 		bool isCellBlocked[256] = {};
 		for (size_t i = 0; i < blockCellCount; i++)
 		{
@@ -31,7 +48,18 @@ public:
 			auto yy = y * w;
 			for (size_t x = 0; x < w; x++)
 			{
-				m_movable[x + yy] = !isCellBlocked[data[x + yy]];
+				m_movable[x + yy] = !isCellBlocked[mapValues[x + yy]];
+			}
+		}
+
+		for (size_t y = 0; y < h; y++)
+		{
+			auto yy = y * w;
+			for (size_t x = 0; x < w; x++)
+			{
+				auto& cell = m_cells[x + yy];
+				cell.value = mapValues[x + yy];
+				cell.itemId = itemIds[x + yy];
 			}
 		}
 

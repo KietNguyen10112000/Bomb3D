@@ -10,6 +10,7 @@
 #include "GameLoopHandler.h"
 
 #include "GameActions/GameActions.h"
+#include "Preload.h"
 
 //std::array<std::array<size_t, 32>, 32> g_mapValues = {};
 
@@ -20,6 +21,8 @@ void Initialize(Engine* engine)
 	GameActions::InitializeAllGameActions();
 
 	Global::s_instance = new Global();
+
+	Preload::LoadAll();
 
 	TCP_SOCKET_DESCRIPTION desc;
 	desc.host = "127.0.0.1";
@@ -56,6 +59,8 @@ void Initialize(Engine* engine)
 
 void Finalize(Engine* engine)
 {
+	Preload::UnloadAll();
+
 	delete Global::Get().connector;
 	delete Global::Get().gameLoop;
 	delete Global::s_instance;

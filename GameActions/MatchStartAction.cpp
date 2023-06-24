@@ -21,6 +21,7 @@ void MatchStartAction::Serialize(ByteStream& stream)
 	stream.Put(m_width);
 	stream.Put(m_height);
 	stream.PutArray(m_map, m_width * m_height);
+	stream.PutArray(m_mapItems, m_width * m_height);
 	stream.PutArray(m_blockCellValues, m_numBlockCell);
 	
 	stream.Put(m_numClient);
@@ -43,8 +44,9 @@ void MatchStartAction::Deserialize(ByteStreamRead& stream)
 
 	uint32_t temp;
 	stream.GetArray(m_map, sizeof(m_map), temp);
+	stream.GetArray(m_mapItems, sizeof(m_mapItems), temp);
 	stream.GetArray(m_blockCellValues, sizeof(m_blockCellValues), m_numBlockCell);
-
+	
 	m_numClient = stream.Get<uint32_t>();
 	for (size_t i = 0; i < m_numClient; i++)
 	{

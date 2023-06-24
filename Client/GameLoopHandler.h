@@ -278,10 +278,7 @@ public:
 						matchStart->m_map, matchStart->m_width, matchStart->m_height,
 						matchStart->m_blockCellValues, matchStart->m_numBlockCell);
 
-					Global::Get().gameMap.Initialize(
-						matchStart->m_width, matchStart->m_height, matchStart->m_map,
-						matchStart->m_blockCellValues, matchStart->m_numBlockCell
-					);
+					Global::Get().gameMap.Initialize(matchStart);
 
 					Global::Get().activeScene = (Scene2D*)argv[1];
 				},

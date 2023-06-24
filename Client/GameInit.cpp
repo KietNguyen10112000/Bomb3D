@@ -131,7 +131,7 @@ void AddMapRenderer(Scene2D* scene, const byte* mapValues, size_t width, size_t 
 		for (size_t x = 0; x < width; x++)
 		{
 			mapRenderer->LoadCell(row[x], String::Format("{}.png", (size_t)row[x]), {});
-			mapRenderer->SetCellValue(x, y, row[x]);
+			//mapRenderer->SetCellValue(x, y, row[x]);
 		}
 	}
 

@@ -4,6 +4,8 @@
 
 using namespace soft;
 
+#include "Global.h"
+
 class Monster : Traceable<Monster>, public Script2D
 {
 protected:

@@ -17,6 +17,7 @@ public:
 	};
 
 	byte m_map[512 * KB];
+	byte m_mapItems[512 * KB];
 	uint32_t m_width;
 	uint32_t m_height;
 

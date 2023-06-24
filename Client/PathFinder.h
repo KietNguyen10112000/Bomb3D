@@ -4,6 +4,8 @@
 #include <queue>
 #include "GameConfig.h"
 
+#include "Math/Math.h"
+
 // incremental Dijkstra algorithm
 class PathFinder
 {

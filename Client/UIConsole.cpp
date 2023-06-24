@@ -4,6 +4,7 @@
 #include <sstream>
 #include <vector>
 #include <iostream>
+#include <deque>
 
 #include "Components2D/Script/Script2D.h"
 

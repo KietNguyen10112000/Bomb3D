@@ -330,6 +330,7 @@ public:
 
 		m_gameMgr.GenerateMap(
 			matchStart->m_map, matchStart->m_width, matchStart->m_height,
+			matchStart->m_mapItems,
 			matchStart->m_blockCellValues, matchStart->m_numBlockCell);
 
 		for (size_t i = 0; i < m_clientsCount; i++)

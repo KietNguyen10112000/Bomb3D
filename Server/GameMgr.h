@@ -15,6 +15,7 @@ public:
 
 	inline void GenerateMap(
 		byte* mapValues, uint32_t& outputWidth, uint32_t& outputHeight,
+		byte* itemValues,
 		byte* blockedCells, uint32_t& outputBlockedCellCount)
 	{
 		blockedCells[0] = 0;
@@ -33,6 +34,7 @@ public:
 		for (size_t y = 0; y < height; y++)
 		{
 			auto row = &mapValues[y * width];
+			auto items = &itemValues[y * width];
 			auto mapRow = &map[y * width];
 			for (size_t x = 0; x < width; x++)
 			{
@@ -42,7 +44,7 @@ public:
 				if (y == 0 || y == height - 1 || x == 0 || x == width - 1)
 				{
 					row[x] = 0;
-					continue;
+					//continue;
 				}
 
 				/*auto v = Random::RangeInt64(1, 10);
@@ -50,6 +52,27 @@ public:
 				{
 					row[x] = 2;
 				}*/
+
+				items[x] = 255;
+				if (row[x] != 0 && Random::RangeInt32(0, 5) == 0)
+				{
+					auto v = Random::RangeInt32(0, 512);
+					if (v <= 490)
+					{
+						// coin
+						items[x] = 0;
+					}
+					else if (v <= 500)
+					{
+						// pistol
+						items[x] = 1;
+					}
+					else if (v <= 510)
+					{
+						// smg
+						items[x] = 2;
+					}
+				}
 			}
 		}
 

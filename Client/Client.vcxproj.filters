@@ -32,6 +32,12 @@
     <Filter Include="Source Files\Scripts\Monsters">
       <UniqueIdentifier>{09ac33a3-1ed6-4b0d-828c-9a30c81caba5}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Game\Item">
+      <UniqueIdentifier>{c34800a3-3a3d-449d-80a6-7d7f6ca5072b}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Item\ItemIconLoader">
+      <UniqueIdentifier>{87468fbe-94f2-4bf2-b4a7-4a93770e0c0d}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -51,6 +57,15 @@
     </ClCompile>
     <ClCompile Include="UIConsole.cpp">
       <Filter>Source Files\Scripts\DebugUI</Filter>
+    </ClCompile>
+    <ClCompile Include="InGameAPI.cpp">
+      <Filter>Source Files\InGameScript</Filter>
+    </ClCompile>
+    <ClCompile Include="BindPython.cpp">
+      <Filter>Source Files\InGameScript</Filter>
+    </ClCompile>
+    <ClCompile Include="ItemIconLoader.cpp">
+      <Filter>Source Files\Game\Item\ItemIconLoader</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -122,6 +137,15 @@
     </ClInclude>
     <ClInclude Include="DebugRenderer.h">
       <Filter>Source Files\Renderers</Filter>
+    </ClInclude>
+    <ClInclude Include="InGameAPI.h">
+      <Filter>Source Files\InGameScript</Filter>
+    </ClInclude>
+    <ClInclude Include="ItemIconLoader.h">
+      <Filter>Source Files\Game\Item\ItemIconLoader</Filter>
+    </ClInclude>
+    <ClInclude Include="Preload.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
