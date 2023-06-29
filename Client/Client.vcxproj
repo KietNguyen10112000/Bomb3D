@@ -145,8 +145,11 @@
     <ClCompile Include="..\GameActions\MatchStartAction.cpp" />
     <ClCompile Include="..\GameActions\UserInputAction.cpp" />
     <ClCompile Include="BindPython.cpp" />
+    <ClCompile Include="Flash.cpp" />
     <ClCompile Include="GameInit.cpp" />
+    <ClCompile Include="GameMap.cpp" />
     <ClCompile Include="InGameAPI.cpp" />
+    <ClCompile Include="Item.cpp" />
     <ClCompile Include="ItemIconLoader.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="UIConsole.cpp" />
@@ -161,6 +164,7 @@
     <ClInclude Include="BindPython.h" />
     <ClInclude Include="BulletScript.h" />
     <ClInclude Include="DebugRenderer.h" />
+    <ClInclude Include="Flash.h" />
     <ClInclude Include="GameConfig.h" />
     <ClInclude Include="GameInit.h" />
     <ClInclude Include="GameMap.h" />
@@ -169,11 +173,13 @@
     <ClInclude Include="GameLoopHandler.h" />
     <ClInclude Include="InGameAPI.h" />
     <ClInclude Include="ItemIconLoader.h" />
+    <ClInclude Include="Item.h" />
     <ClInclude Include="MapRenderer.h" />
     <ClInclude Include="Monster.h" />
     <ClInclude Include="PathFinder.h" />
     <ClInclude Include="PlayerScript.h" />
     <ClInclude Include="Preload.h" />
+    <ClInclude Include="Skill.h" />
     <ClInclude Include="TAG.h" />
     <ClInclude Include="UIConsole.h" />
     <ClInclude Include="UIDebugPathFinder.h" />

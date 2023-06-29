@@ -21,10 +21,19 @@
 
 #include "GameActions/GameActionConfig.h"
 
+#include "Item.h"
+#include "Skill.h"
+
 using namespace soft;
 
 class PlayerScript : Traceable<PlayerScript>, public Script2D
 {
+public:
+	struct PlayerData
+	{
+		size_t coin = 0;
+	};
+
 protected:
 	SCRIPT2D_DEFAULT_METHOD(PlayerScript);
 	using Base = Script2D;
@@ -69,6 +78,11 @@ public:
 	float m_gunRotationLerpTimeMax = 0;
 	float m_gunRotationLerpTime = 0;
 	float m_gunRotationSpeed = 6 * PI;
+
+	PlayerData m_data;
+
+	Handle<Skill> m_skills[5];
+	size_t m_curSkillIdx = 0;
 
 	inline void RecordInputAction()
 	{
@@ -151,6 +165,20 @@ public:
 		m_userId = id;
 	}
 
+	inline void CheckPickItem() 
+	{
+		auto center = Position() + Vec2(25, 25);
+		auto& map = Global::Get().gameMap;
+		auto item = map.GetItem(center);
+		if (item != nullptr)
+		{
+			if (item->Use(this))
+			{
+				map.ClearItem(center);
+			}
+		}
+	}
+
 	virtual void OnStart() override
 	{
 		m_input = &Global::Get().gameLoop->m_userInput[m_userId];
@@ -176,14 +204,8 @@ public:
 		m_gunRecoilEnd = m_gun->Position();
 	}
 
-	virtual void OnUpdate(float dt) override
+	inline void MovePlayer(float dt)
 	{
-		m_input->Roll();
-		if (m_userId == Global::Get().userId)
-			RecordInputAction();
-		else
-			HidePlayerUI();
-
 		Vec2 motion = { 0,0 };
 		m_renderer->SetSprite(0);
 
@@ -215,6 +237,27 @@ public:
 		{
 			Position() += motion.Normalize() * m_speed * dt;
 		}
+	}
+
+	virtual void OnUpdate(float dt) override
+	{
+		m_input->Roll();
+		if (m_userId == Global::Get().userId)
+			RecordInputAction();
+		else
+			HidePlayerUI();
+
+		auto skillFlag = 0;
+		auto& curSkill = GetCurSkill();
+		if (curSkill.Get())
+		{
+			skillFlag = curSkill->Update(this, dt);
+		}
+
+		if (!(skillFlag & Skill::FLAG_NO_MOVE))
+		{
+			MovePlayer(dt);
+		}
 
 		{
 			m_recoil = std::max(m_recoil - dt, 0.0f);
@@ -240,6 +283,8 @@ public:
 
 			m_crossHair->Position() = m_crossHairPos;
 		}
+
+		CheckPickItem();
 
 		if (m_userId == Global::Get().userId)
 		{
@@ -292,5 +337,30 @@ public:
 
 			m_recoil = m_recoilMax;
 		}
+	}
+
+	inline auto& Data()
+	{
+		return m_data;
+	}
+
+	inline auto GetSkills()
+	{
+		return m_skills;
+	}
+
+	inline constexpr auto GetSkillsCount()
+	{
+		return sizeof(m_skills) / sizeof(m_skills[0]);
+	}
+
+	inline auto GetCurSkillId()
+	{
+		return m_curSkillIdx;
+	}
+
+	inline Handle<Skill>& GetCurSkill()
+	{
+		return m_skills[m_curSkillIdx];
 	}
 };

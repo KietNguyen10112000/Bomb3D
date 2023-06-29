@@ -38,6 +38,9 @@
     <Filter Include="Source Files\Game\Item\ItemIconLoader">
       <UniqueIdentifier>{87468fbe-94f2-4bf2-b4a7-4a93770e0c0d}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Game\Skill">
+      <UniqueIdentifier>{7b74296d-31bf-43d5-969a-093cfac6cd3c}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -66,6 +69,15 @@
     </ClCompile>
     <ClCompile Include="ItemIconLoader.cpp">
       <Filter>Source Files\Game\Item\ItemIconLoader</Filter>
+    </ClCompile>
+    <ClCompile Include="GameMap.cpp">
+      <Filter>Source Files\Game</Filter>
+    </ClCompile>
+    <ClCompile Include="Item.cpp">
+      <Filter>Source Files\Game\Item</Filter>
+    </ClCompile>
+    <ClCompile Include="Flash.cpp">
+      <Filter>Source Files\Game\Skill</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -146,6 +158,15 @@
     </ClInclude>
     <ClInclude Include="Preload.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="Item.h">
+      <Filter>Source Files\Game\Item</Filter>
+    </ClInclude>
+    <ClInclude Include="Skill.h">
+      <Filter>Source Files\Game\Skill</Filter>
+    </ClInclude>
+    <ClInclude Include="Flash.h">
+      <Filter>Source Files\Game\Skill</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

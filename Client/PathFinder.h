@@ -65,7 +65,7 @@ public:
 			pathFinder = (finder);
 			//visited = (finder->m_visited);
 			//dist = (finder->m_dist);
-			queue = { Cmp{ this }, std::vector<Cell>(8 * KB) };
+			queue = { Cmp{ this }, std::vector<Cell>(8 * 1024) };
 			while (!queue.empty()) { queue.pop(); }
 		}
 

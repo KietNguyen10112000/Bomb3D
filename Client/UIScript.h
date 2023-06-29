@@ -164,6 +164,32 @@ public:
 		}
 	}
 
+	inline void ShowMyPlayerUI()
+	{
+		auto player = Global::Get().GetMyPlayer();
+		auto& playerData = player->Data();
+
+		bool open = true;
+		ImGui::SetNextWindowPos(ImVec2(300, 720 - 70));
+		ImGui::SetNextWindowBgAlpha(0.35f);
+		ImGui::SetNextWindowSize(ImVec2(960 - 350, 50));
+		ImGui::Begin("Player", &open, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
+
+		//ImGui::SetNextItemWidth(50);
+		ImGui::PushStyleColor(0, { 1,1,0,1 });
+		ImGui::TextWrapped("%d coin", playerData.coin);
+		ImGui::PopStyleColor();
+
+		auto skills = player->GetSkills();
+		auto skillCount = player->GetSkillsCount();
+		for (size_t i = 0; i < skillCount; i++)
+		{
+
+		}
+
+		ImGui::End();
+	}
+
 	virtual void OnGUI() override
 	{
 		auto& window = Graphics2D::Get()->m_window;
@@ -176,6 +202,8 @@ public:
 		auto miniMapPos = (playerPos / (float)(mapSize * GameConfig::CELL_SIZE)) * (float)MINIMAP_SIZE;
 		m_miniMapBlock.setPosition(reinterpret_cast<sf::Vector2f&>(miniMapPos) + m_miniMap.getPosition());
 		window.draw(m_miniMapBlock);
+
+		ShowMyPlayerUI();
 
 		RenderConsole();
 		//UIDebugPathFinder::Render(m_scene->GetRenderingSystem());
