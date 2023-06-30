@@ -10,13 +10,20 @@ struct UserInput
 	bool	m_curKey[256] = {};
 	float	m_curRotation = 0;
 
+	bool	m_prevSynchKey[256] = {};
+
 	bool	m_synchKey[256] = {};
 	float	m_synchRotation = 0;
 
 	inline void Roll()
 	{
 		m_prevRotation = m_curRotation;
-		memcpy(m_prevKey, m_curKey, 256);
+		memcpy(m_prevKey, m_curKey, 256 * sizeof(bool));
+	}
+
+	inline void RollSynch()
+	{
+		memcpy(m_prevSynchKey, m_synchKey, 256 * sizeof(bool));
 	}
 
 	inline void SetKeyDown(byte keyCode)
@@ -42,6 +49,11 @@ struct UserInput
 	inline bool IsKeyDown(byte keyCode)
 	{
 		return m_synchKey[keyCode];
+	}
+
+	inline bool IsKeyUp(byte keyCode)
+	{
+		return m_synchKey[keyCode] == false && m_prevSynchKey[keyCode] == true;
 	}
 };
 

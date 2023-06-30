@@ -23,6 +23,7 @@
 
 #include "Item.h"
 #include "Skill.h"
+#include "Flash.h"
 
 using namespace soft;
 
@@ -45,6 +46,8 @@ protected:
 		tracer->Trace(m_cam);
 		tracer->Trace(m_gun);
 		tracer->Trace(m_redLine);
+		tracer->Trace(m_skills);
+		tracer->Trace(m_skillsUI);
 	}
 
 	Handle<SpritesRenderer>			m_renderer;
@@ -82,7 +85,8 @@ public:
 	PlayerData m_data;
 
 	Handle<Skill> m_skills[5];
-	size_t m_curSkillIdx = 0;
+	Handle<Renderer2D> m_skillsUI[5];
+	size_t m_curSkillIdx = INVALID_ID;
 
 	inline void RecordInputAction()
 	{
@@ -102,6 +106,7 @@ public:
 		m_input->SetKey('A', Input()->IsKeyDown('A'));
 		m_input->SetKey('D', Input()->IsKeyDown('D'));
 		m_input->SetKey(KEYBOARD::MOUSE_LEFT, Input()->IsKeyDown(KEYBOARD::MOUSE_LEFT));
+		m_input->SetKey(KEYBOARD::MOUSE_RIGHT, Input()->IsKeyDown(KEYBOARD::MOUSE_RIGHT));
 
 		auto& cursorPos = Input()->GetCursor().position;
 		auto center = m_cam->GetWorldPosition(Vec2(cursorPos.x, cursorPos.y),
@@ -179,6 +184,19 @@ public:
 		}
 	}
 
+	inline void InitTestSkill()
+	{
+		auto flash = mheap::New<Flash>();
+		auto flashUI = flash->GetPrepareSkillUI(this);
+		flash->OnAcquired(this, 0);
+		flash->OnChose(this);
+		GetObject()->AddChild(flashUI);
+
+		m_curSkillIdx = 0;
+		m_skills[0] = flash;
+		m_skillsUI[0] = flashUI->GetComponent<Renderer2D>();
+	}
+
 	virtual void OnStart() override
 	{
 		m_input = &Global::Get().gameLoop->m_userInput[m_userId];
@@ -202,6 +220,8 @@ public:
 		m_bulletCollider = MakeShared<RectCollider>(Rect(-30, -5, 60, 10));
 
 		m_gunRecoilEnd = m_gun->Position();
+
+		InitTestSkill();
 	}
 
 	inline void MovePlayer(float dt)
@@ -239,6 +259,39 @@ public:
 		}
 	}
 
+	inline void UseSkill(float dt)
+	{
+		if (m_curSkillIdx == INVALID_ID)
+		{
+			return;
+		}
+
+		auto& curSkill = GetCurSkill();
+		auto& curSkillUI = GetCurSkillUI();
+		curSkillUI->SetVisible(false);
+		if (m_input->IsKeyDown(KEYBOARD::MOUSE_RIGHT))
+		{
+			curSkillUI->SetVisible(true);
+		}
+
+		if (curSkill->m_coolDown != 0 && curSkill->IsReady())
+		{
+			if ((curSkill->m_coolDown -= dt) <= 0)
+			{
+				curSkill->m_coolDown = 0;
+			}
+		}
+
+		//std::cout << m_input->m_prevSynchKey[KEYBOARD::MOUSE_RIGHT] << ", " << m_input->m_synchKey[KEYBOARD::MOUSE_RIGHT] << '\n';
+		if (m_input->IsKeyUp(KEYBOARD::MOUSE_RIGHT) && curSkill->m_coolDown == 0)
+		{
+			if (curSkill->Activate(this))
+			{
+				curSkill->m_coolDown = curSkill->GetCooldownTime();
+			}
+		}
+	}
+
 	virtual void OnUpdate(float dt) override
 	{
 		m_input->Roll();
@@ -258,6 +311,8 @@ public:
 		{
 			MovePlayer(dt);
 		}
+
+		UseSkill(dt);
 
 		{
 			m_recoil = std::max(m_recoil - dt, 0.0f);
@@ -290,6 +345,8 @@ public:
 		{
 			Global::Get().ExecuteAction(&m_inputAction);
 		}
+
+		m_input->RollSynch();
 	}
 
 	/*virtual void OnCollide(GameObject2D* obj, const Collision2DPair& pair) override
@@ -362,5 +419,31 @@ public:
 	inline Handle<Skill>& GetCurSkill()
 	{
 		return m_skills[m_curSkillIdx];
+	}
+
+	inline Handle<Renderer2D>& GetCurSkillUI()
+	{
+		return m_skillsUI[m_curSkillIdx];
+	}
+
+	inline Vec2 GetForwardDir()
+	{
+		auto rotation = m_input->m_synchRotation;
+		return { std::cos(rotation), std::sin(rotation) };
+	}
+
+	inline auto GetInputRotation()
+	{
+		return m_input->m_synchRotation;
+	}
+
+	inline Vec2 CenterPosition()
+	{
+		return Position() + Vec2(25, 25);
+	}
+
+	inline Physics2D* GetPhysics()
+	{
+		return GetObject()->GetComponentRaw<Physics2D>();
 	}
 };

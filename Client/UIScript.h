@@ -170,7 +170,7 @@ public:
 		auto& playerData = player->Data();
 
 		bool open = true;
-		ImGui::SetNextWindowPos(ImVec2(300, 720 - 70));
+		ImGui::SetNextWindowPos(ImVec2(300, 720 - 55));
 		ImGui::SetNextWindowBgAlpha(0.35f);
 		ImGui::SetNextWindowSize(ImVec2(960 - 350, 50));
 		ImGui::Begin("Player", &open, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
