@@ -23,11 +23,6 @@ public:
 
 	virtual void OnUpdate(float dt) override
 	{
-		if (!m_renderer->IsVisible())
-		{
-			return;
-		}
-
 		GetObject()->Rotation() = m_player->GetInputRotation();
 	}
 

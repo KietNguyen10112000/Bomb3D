@@ -38,6 +38,10 @@ protected:
 	sf::RectangleShape m_miniMapBlock;
 	sf::Sprite m_miniMap;
 
+	Skill* m_playerSkills[5] = {};
+	Sprite m_playerSkillsIcon[5] = {};
+	String m_playerSkillsDesc[5] = {};
+
 public:
 	UIScript()
 	{
@@ -166,6 +170,8 @@ public:
 
 	inline void ShowMyPlayerUI()
 	{
+		auto rdr = m_scene->GetRenderingSystem();
+
 		auto player = Global::Get().GetMyPlayer();
 		auto& playerData = player->Data();
 
@@ -184,7 +190,22 @@ public:
 		auto skillCount = player->GetSkillsCount();
 		for (size_t i = 0; i < skillCount; i++)
 		{
+			auto& skill = skills[i];
+			if (m_playerSkills[i] != skill.Get())
+			{
+				auto path = skill->GetGUIImgPath();
+				auto desc = skill->GetDesc();
+				m_playerSkillsIcon[i].Initialize(path, AARect(), {});
+				m_playerSkillsIcon[i].Transform().Translation() = { 400 + i * 40, 720 - 45 };
+				m_playerSkillsIcon[i].FitTextureSize({ 32,32 });
+				m_playerSkillsDesc[i] = desc;
+			}
 
+			if (skill)
+			{
+				//rdr->DrawSprite(m_playerSkillsIcon[i]);
+				Renderer2D::RenderSprite(rdr, m_playerSkillsIcon[i]);
+			}
 		}
 
 		ImGui::End();

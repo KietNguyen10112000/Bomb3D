@@ -169,8 +169,10 @@
     <ClInclude Include="GameInit.h" />
     <ClInclude Include="GameMap.h" />
     <ClInclude Include="GameSetting.h" />
+    <ClInclude Include="GameUtils.h" />
     <ClInclude Include="Global.h" />
     <ClInclude Include="GameLoopHandler.h" />
+    <ClInclude Include="ProcessBarRenderer.h" />
     <ClInclude Include="InGameAPI.h" />
     <ClInclude Include="ItemIconLoader.h" />
     <ClInclude Include="Item.h" />

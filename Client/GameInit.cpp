@@ -11,6 +11,8 @@
 
 #include "DebugRenderer.h"
 
+#include "GameUtils.h"
+
 using namespace soft;
 
 void AddStaticObjects(Scene2D* scene, byte* mapValues, size_t width, size_t height,
@@ -116,6 +118,8 @@ void AddPlayer(Scene2D* scene, ID id, const Vec2& pos, size_t width, size_t heig
 	crossHairRdr->Sprite().SetOpacity(128);
 	crossHairRdr->ClearAABB();
 	player->AddChild(crossHair);
+
+	GameUtils::AddHpBar(player, sf::Color::Green, 70, 100, &script->Data().hp)->Position() = { -10, -25 };
 
 	scene->AddObject(player);
 }

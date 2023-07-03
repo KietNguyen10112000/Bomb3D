@@ -168,6 +168,12 @@
     <ClInclude Include="Flash.h">
       <Filter>Source Files\Game\Skill</Filter>
     </ClInclude>
+    <ClInclude Include="GameUtils.h">
+      <Filter>Source Files\Game</Filter>
+    </ClInclude>
+    <ClInclude Include="ProcessBarRenderer.h">
+      <Filter>Source Files\Renderers</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="..\DebugView.natvis">

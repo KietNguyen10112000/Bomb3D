@@ -32,6 +32,7 @@ class PlayerScript : Traceable<PlayerScript>, public Script2D
 public:
 	struct PlayerData
 	{
+		float hp = 100.0f;
 		size_t coin = 0;
 	};
 
@@ -445,5 +446,10 @@ public:
 	inline Physics2D* GetPhysics()
 	{
 		return GetObject()->GetComponentRaw<Physics2D>();
+	}
+
+	inline ID GetTeamId()
+	{
+		return m_userId % 2;
 	}
 };
