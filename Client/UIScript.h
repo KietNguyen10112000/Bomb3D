@@ -4,6 +4,7 @@
 #include "Objects2D/Physics/Colliders/CircleCollider.h"
 
 #include "imgui/imgui.h"
+#include "imgui-SFML/imgui-SFML.h"
 
 #include "Global.h"
 #include "UIConsole.h"
@@ -168,23 +169,39 @@ public:
 		}
 	}
 
+	inline void ShowMyPlayerInfo()
+	{
+		auto player = Global::Get().GetMyPlayer();
+		auto& playerData = player->Data();
+
+		bool open = true;
+		ImGui::SetNextWindowPos(ImVec2(280, 720 - 55 - 55));
+		ImGui::SetNextWindowBgAlpha(0.35f);
+		ImGui::SetNextWindowSize(ImVec2(960 - 300, 50));
+		ImGui::Begin("Player Info", &open, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
+
+		//ImGui::SetNextItemWidth(50);
+		ImGui::PushStyleColor(0, { 1,1,0,1 });
+		ImGui::TextWrapped("%d coin", playerData.coin);
+		ImGui::PopStyleColor();
+
+		ImGui::End();
+	}
+
 	inline void ShowMyPlayerUI()
 	{
+		ShowMyPlayerInfo();
+
 		auto rdr = m_scene->GetRenderingSystem();
 
 		auto player = Global::Get().GetMyPlayer();
 		auto& playerData = player->Data();
 
 		bool open = true;
-		ImGui::SetNextWindowPos(ImVec2(300, 720 - 55));
+		ImGui::SetNextWindowPos(ImVec2(280, 720 - 55));
 		ImGui::SetNextWindowBgAlpha(0.35f);
-		ImGui::SetNextWindowSize(ImVec2(960 - 350, 50));
-		ImGui::Begin("Player", &open, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
-
-		//ImGui::SetNextItemWidth(50);
-		ImGui::PushStyleColor(0, { 1,1,0,1 });
-		ImGui::TextWrapped("%d coin", playerData.coin);
-		ImGui::PopStyleColor();
+		ImGui::SetNextWindowSize(ImVec2(960 - 300, 50));
+		ImGui::Begin("Player Skills", &open, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
 
 		auto skills = player->GetSkills();
 		auto skillCount = player->GetSkillsCount();
@@ -196,15 +213,30 @@ public:
 				auto path = skill->GetGUIImgPath();
 				auto desc = skill->GetDesc();
 				m_playerSkillsIcon[i].Initialize(path, AARect(), {});
-				m_playerSkillsIcon[i].Transform().Translation() = { 400 + i * 40, 720 - 45 };
+				//m_playerSkillsIcon[i].Transform().Translation() = { 400 + i * 40, 720 - 45 };
 				m_playerSkillsIcon[i].FitTextureSize({ 32,32 });
 				m_playerSkillsDesc[i] = desc;
 			}
 
 			if (skill)
 			{
-				//rdr->DrawSprite(m_playerSkillsIcon[i]);
-				Renderer2D::RenderSprite(rdr, m_playerSkillsIcon[i]);
+				/*if (skill->m_coolDown != 0)
+				{
+					m_playerSkillsIcon[i].SetColor(128, 128, 128, 255);
+				}*/
+
+				//ImGui::SetCursorPos({ 32.0f * i + 32, 10 });
+				ImGui::SameLine();
+				m_playerSkillsIcon[i].PrepareRender();
+				ImGui::Image(m_playerSkillsIcon[i].SFSprite(), skill->m_coolDown != 0 ? sf::Color(128,128,128,255) : sf::Color::White);
+
+				if (skill->m_coolDown != 0)
+				{
+					//ImGui::SetCursorPos({ 32.0f * i + 32 + 10, 10 });
+					ImGui::SameLine();
+					ImGui::Text("%.2f", skill->m_coolDown);
+				}
+				
 			}
 		}
 

@@ -101,14 +101,14 @@ void AddPlayer(Scene2D* scene, ID id, const Vec2& pos, size_t width, size_t heig
 	line->Position() = { 50 / 2.0f, 40 };
 	player->AddChild(line);
 
-	// gun
-	auto gunObj = mheap::New<GameObject2D>(GameObject2D::DYNAMIC);
-	auto gunRdr = gunObj->NewComponent<SpriteRenderer>("smg2.png");
-	gunRdr->Sprite().SetAnchorPoint(Vec2(100 / 331.0f, 40 / 120.0f));
-	gunRdr->Sprite().Transform().Scale() = Vec2(0.3f);
-	gunRdr->ClearAABB();
-	gunObj->Position() = { 50 / 2.0f, 40 };
-	player->AddChild(gunObj);
+	//// gun
+	//auto gunObj = mheap::New<GameObject2D>(GameObject2D::DYNAMIC);
+	//auto gunRdr = gunObj->NewComponent<SpriteRenderer>("smg2.png");
+	//gunRdr->Sprite().SetAnchorPoint(Vec2(100 / 331.0f, 40 / 120.0f));
+	//gunRdr->Sprite().Transform().Scale() = Vec2(0.3f);
+	//gunRdr->ClearAABB();
+	//gunObj->Position() = { 50 / 2.0f, 40 };
+	//player->AddChild(gunObj);
 
 	// crosshair
 	auto crossHair = mheap::New<GameObject2D>(GameObject2D::DYNAMIC);

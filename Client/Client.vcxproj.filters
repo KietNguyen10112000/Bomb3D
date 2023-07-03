@@ -41,6 +41,9 @@
     <Filter Include="Source Files\Game\Skill">
       <UniqueIdentifier>{7b74296d-31bf-43d5-969a-093cfac6cd3c}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Game\Gun">
+      <UniqueIdentifier>{c27deb0e-56ae-4117-8104-daadb4386b4f}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -78,6 +81,9 @@
     </ClCompile>
     <ClCompile Include="Flash.cpp">
       <Filter>Source Files\Game\Skill</Filter>
+    </ClCompile>
+    <ClCompile Include="SMG.cpp">
+      <Filter>Source Files\Game\Gun</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -173,6 +179,12 @@
     </ClInclude>
     <ClInclude Include="ProcessBarRenderer.h">
       <Filter>Source Files\Renderers</Filter>
+    </ClInclude>
+    <ClInclude Include="Gun.h">
+      <Filter>Source Files\Game\Gun</Filter>
+    </ClInclude>
+    <ClInclude Include="SMG.h">
+      <Filter>Source Files\Game\Gun</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

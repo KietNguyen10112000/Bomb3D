@@ -152,6 +152,7 @@
     <ClCompile Include="Item.cpp" />
     <ClCompile Include="ItemIconLoader.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="SMG.cpp" />
     <ClCompile Include="UIConsole.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -182,10 +183,12 @@
     <ClInclude Include="PlayerScript.h" />
     <ClInclude Include="Preload.h" />
     <ClInclude Include="Skill.h" />
+    <ClInclude Include="SMG.h" />
     <ClInclude Include="TAG.h" />
     <ClInclude Include="UIConsole.h" />
     <ClInclude Include="UIDebugPathFinder.h" />
     <ClInclude Include="UIScript.h" />
+    <ClInclude Include="Gun.h" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="..\DebugView.natvis" />

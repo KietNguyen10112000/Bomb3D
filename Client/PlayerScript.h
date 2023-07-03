@@ -24,6 +24,7 @@
 #include "Item.h"
 #include "Skill.h"
 #include "Flash.h"
+#include "SMG.h"
 
 using namespace soft;
 
@@ -49,6 +50,7 @@ protected:
 		tracer->Trace(m_redLine);
 		tracer->Trace(m_skills);
 		tracer->Trace(m_skillsUI);
+		tracer->Trace(m_guns);
 	}
 
 	Handle<SpritesRenderer>			m_renderer;
@@ -88,6 +90,9 @@ public:
 	Handle<Skill> m_skills[5];
 	Handle<Renderer2D> m_skillsUI[5];
 	size_t m_curSkillIdx = INVALID_ID;
+
+	Handle<Gun> m_guns[2];
+	size_t m_curGunId = 0;
 
 	inline void RecordInputAction()
 	{
@@ -198,8 +203,20 @@ public:
 		m_skillsUI[0] = flashUI->GetComponent<Renderer2D>();
 	}
 
+	inline void InitTestGun()
+	{
+		m_guns[0] = mheap::New<SMG>();
+		m_curGunId = 0;
+	}
+
 	virtual void OnStart() override
 	{
+		InitTestSkill();
+		InitTestGun();
+
+		m_gun = m_guns[m_curGunId]->GetGunObject(this);
+		GetObject()->AddChild(m_gun);
+
 		m_input = &Global::Get().gameLoop->m_userInput[m_userId];
 		m_inputAction.SetUserId(m_userId, m_input);
 
@@ -213,7 +230,7 @@ public:
 		}
 
 		m_redLine = GetObject()->Child(childIdx++);
-		m_gun = GetObject()->Child(childIdx++);
+		//m_gun = GetObject()->Child(childIdx++);
 		m_crossHair = GetObject()->Child(childIdx++);
 
 		Input()->SetClampCursorInsideWindow(m_enableMouse);
@@ -222,7 +239,6 @@ public:
 
 		m_gunRecoilEnd = m_gun->Position();
 
-		InitTestSkill();
 	}
 
 	inline void MovePlayer(float dt)
@@ -270,7 +286,7 @@ public:
 		auto& curSkill = GetCurSkill();
 		auto& curSkillUI = GetCurSkillUI();
 		curSkillUI->SetVisible(false);
-		if (m_input->IsKeyDown(KEYBOARD::MOUSE_RIGHT))
+		if (curSkill->m_coolDown == 0 && m_input->IsKeyDown(KEYBOARD::MOUSE_RIGHT))
 		{
 			curSkillUI->SetVisible(true);
 		}
@@ -370,15 +386,18 @@ public:
 		{
 			Vec2 dir = { std::cos(rotation), std::sin(rotation) };
 
-			auto bullet = mheap::New<GameObject2D>(GameObject2D::DYNAMIC);
+			/*auto bullet = mheap::New<GameObject2D>(GameObject2D::DYNAMIC);
 			auto bulletRdr = bullet->NewComponent<SpriteRenderer>("red.png");
 			bulletRdr->Sprite().FitTextureSize({ 60, 10 });
 			bulletRdr->Sprite().SetAnchorPoint({ 0.5f, 0.5f });
 
-			bullet->NewComponent<FastBulletScript>()->Setup(GetObject(), dir, 3000.0f);
+			bullet->NewComponent<FastBulletScript>()->Setup(GetObject(), dir, 3000.0f);*/
 
 			/*bullet->NewComponent<Physics2D>(Physics2D::SENSOR, m_bulletCollider)
 				->CollisionMask() = (1ull << 3);*/
+
+			auto& gun = m_guns[m_curGunId];
+			auto bullet = gun->NewBullet(this, dir);
 
 			bullet->Position() = Position();
 			bullet->Position().x += 25;
@@ -393,6 +412,7 @@ public:
 			m_gunRecoilBegin = m_gun->Position() - dir * m_gunRecoilLen;
 			m_gun->Position() = m_gunRecoilBegin;
 
+			m_recoilMax = gun->GetRecoilTime(this);
 			m_recoil = m_recoilMax;
 		}
 	}
