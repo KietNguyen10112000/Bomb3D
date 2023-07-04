@@ -329,6 +329,7 @@ public:
 		matchStart->m_roomID = roomId;
 
 		m_gameMgr.GenerateMap(
+			matchStart,
 			matchStart->m_map, matchStart->m_width, matchStart->m_height,
 			matchStart->m_mapItems,
 			matchStart->m_blockCellValues, matchStart->m_numBlockCell);

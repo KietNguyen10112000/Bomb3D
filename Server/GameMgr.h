@@ -13,7 +13,36 @@ class GameMgr
 public:
 	constexpr static size_t MAP_SIZE = 6;
 
+	inline void GenerateMonsters(MatchStartAction* action, byte* map, size_t width, size_t height)
+	{
+		auto& monsters = action->m_mapMonstersId;
+		auto& items = action->m_mapItems;
+
+		for (size_t y = 0; y < height; y++)
+		{
+			auto idy = y * width;
+			auto row = &monsters[idy];
+			auto rowItem = &items[idy];
+			auto mapRow = &map[idy];
+			for (size_t x = 0; x < width; x++)
+			{
+				row[x] = 255;
+				auto movable = (bool)mapRow[x] ? false : true;
+				if (rowItem[x] != 255 || !movable)
+				{
+					continue;
+				}
+
+				if (Random::RangeInt32(0, 20) == 0)
+				{
+					row[x] = 1;
+				}
+			}
+		}
+	}
+
 	inline void GenerateMap(
+		MatchStartAction* action,
 		byte* mapValues, uint32_t& outputWidth, uint32_t& outputHeight,
 		byte* itemValues,
 		byte* blockedCells, uint32_t& outputBlockedCellCount)
@@ -80,6 +109,10 @@ public:
 		{
 			mapValues[3 * width + i + 3] = 1;
 		}
+
+		action->m_randomSeed = (size_t)Random::RangeInt64(std::numeric_limits<int64_t>::min(), std::numeric_limits<int64_t>::max());
+
+		GenerateMonsters(action, map, width, height);
 	}
 
 	inline void SetPlayerPos(ID id, Vec2& outputPos)

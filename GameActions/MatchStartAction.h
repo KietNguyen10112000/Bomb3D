@@ -18,6 +18,9 @@ public:
 
 	byte m_map[512 * KB];
 	byte m_mapItems[512 * KB];
+
+	byte m_mapMonstersId[512 * KB];
+	
 	uint32_t m_width;
 	uint32_t m_height;
 
@@ -31,6 +34,7 @@ public:
 	ID m_roomID = INVALID_ID;
 
 	size_t m_sendUserIDIdx = INVALID_ID;
+	size_t m_randomSeed = 0;
 
 	MatchStartAction();
 

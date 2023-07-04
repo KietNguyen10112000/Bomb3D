@@ -6,14 +6,11 @@
 #include "PlayerScript.h"
 #include "UIScript.h"
 #include "MapRenderer.h"
-
 #include "GameInit.h"
-
 #include "DebugRenderer.h"
-
 #include "GameUtils.h"
-
 #include "TAG.h"
+#include "MonsterGenerator.h"
 
 using namespace soft;
 
@@ -173,6 +170,24 @@ void AddUINode(Scene2D* scene)
 	ui->NewComponent<UIScript>();
 	ui->NewComponent<DebugRenderer>();
 	scene->AddObject(ui);
+}
+
+void AddMapMonsters(Scene2D* scene, const byte* mapMonsterIds, size_t width, size_t height)
+{
+	for (size_t y = 0; y < height; y++)
+	{
+		auto row = &mapMonsterIds[y * width];
+		for (size_t x = 0; x < width; x++)
+		{
+			auto monsterId = row[x];
+			auto monster = MonsterGenerator::NewMonster(monsterId);
+			if (monster)
+			{
+				monster->Position() = { x * GameConfig::CELL_SIZE, y * GameConfig::CELL_SIZE };
+				scene->AddObject(monster);
+			}
+		}
+	}
 }
 
 //void AddDynamicObjects(Scene2D* scene)

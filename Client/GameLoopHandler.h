@@ -270,6 +270,9 @@ public:
 
 			assert(m_actionSynch.action->GetActionID() == GameActions::ACTION_ID::MATCH_START);
 
+			MatchStartAction* matchStart = (MatchStartAction*)m_actionSynch.action;
+			Global::Get().Random().Seed(matchStart->m_randomSeed);
+
 			engine->AddListener(ENGINE_EVENT::SCENE_ON_SETUP,
 				[](int argc, void** argv, void* a)
 				{
@@ -311,6 +314,8 @@ public:
 						auto& client = clients[i];
 						AddPlayer(scene, client.id, client.pos, matchStart->m_width, matchStart->m_height);
 					}
+
+					AddMapMonsters(scene, matchStart->m_mapMonstersId, matchStart->m_width, matchStart->m_height);
 					
 					AddMapRenderer(scene, matchStart->m_map, matchStart->m_width, matchStart->m_height);
 

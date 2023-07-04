@@ -22,6 +22,7 @@ void MatchStartAction::Serialize(ByteStream& stream)
 	stream.Put(m_height);
 	stream.PutArray(m_map, m_width * m_height);
 	stream.PutArray(m_mapItems, m_width * m_height);
+	stream.PutArray(m_mapMonstersId, m_width * m_height);
 	stream.PutArray(m_blockCellValues, m_numBlockCell);
 	
 	stream.Put(m_numClient);
@@ -35,6 +36,7 @@ void MatchStartAction::Serialize(ByteStream& stream)
 
 	m_sendUserIDIdx = stream.Put(m_userID);
 	stream.Put(m_roomID);
+	stream.Put(m_randomSeed);
 }
 
 void MatchStartAction::Deserialize(ByteStreamRead& stream)
@@ -45,6 +47,7 @@ void MatchStartAction::Deserialize(ByteStreamRead& stream)
 	uint32_t temp;
 	stream.GetArray(m_map, sizeof(m_map), temp);
 	stream.GetArray(m_mapItems, sizeof(m_mapItems), temp);
+	stream.GetArray(m_mapMonstersId, sizeof(m_mapMonstersId), temp);
 	stream.GetArray(m_blockCellValues, sizeof(m_blockCellValues), m_numBlockCell);
 	
 	m_numClient = stream.Get<uint32_t>();
@@ -58,6 +61,7 @@ void MatchStartAction::Deserialize(ByteStreamRead& stream)
 
 	m_userID = stream.Get<ID>();
 	m_roomID = stream.Get<ID>();
+	m_randomSeed = stream.Get<size_t>();
 }
 
 void MatchStartAction::Activate(Scene2D* scene)

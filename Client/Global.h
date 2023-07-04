@@ -7,6 +7,7 @@
 
 #include "GameSetting.h"
 #include "GameMap.h"
+#include "Core/Random/ProcRandom.h"
 
 using namespace soft;
 
@@ -43,6 +44,8 @@ struct Global
 	Camera2D* cam;
 	PlayerScript* players[10] = {};
 
+	ProcRandom procRandom = {};
+
 	inline auto GetMyPlayer()
 	{
 		return players[userId];
@@ -58,5 +61,10 @@ struct Global
 		actionCount++;
 		actionStream->Put<ActionID>(action->GetActionID());
 		action->Serialize(*actionStream);
+	}
+
+	inline auto& Random()
+	{
+		return procRandom;
 	}
 };

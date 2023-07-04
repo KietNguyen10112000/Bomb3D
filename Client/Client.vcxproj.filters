@@ -44,6 +44,12 @@
     <Filter Include="Source Files\Game\Gun">
       <UniqueIdentifier>{c27deb0e-56ae-4117-8104-daadb4386b4f}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Game\Monsters">
+      <UniqueIdentifier>{cfa43deb-846c-45a7-860e-084d27bb4e54}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Game\Monsters\MonsterGenerators">
+      <UniqueIdentifier>{453371d8-3240-4e77-8d9a-afabf73d8d32}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -84,6 +90,12 @@
     </ClCompile>
     <ClCompile Include="SMG.cpp">
       <Filter>Source Files\Game\Gun</Filter>
+    </ClCompile>
+    <ClCompile Include="MonsterGenerator.cpp">
+      <Filter>Source Files\Game\Monsters\MonsterGenerators</Filter>
+    </ClCompile>
+    <ClCompile Include="SlimeGenerator.cpp">
+      <Filter>Source Files\Game\Monsters\MonsterGenerators</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -188,6 +200,12 @@
     </ClInclude>
     <ClInclude Include="BaseDynamicObjectScript.h">
       <Filter>Source Files\Scripts</Filter>
+    </ClInclude>
+    <ClInclude Include="MonsterGenerator.h">
+      <Filter>Source Files\Game\Monsters\MonsterGenerators</Filter>
+    </ClInclude>
+    <ClInclude Include="SlimeGenerator.h">
+      <Filter>Source Files\Game\Monsters\MonsterGenerators</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

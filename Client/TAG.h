@@ -7,6 +7,7 @@ public:
 	{
 		WALL			= 0,
 		PLAYER			= 1,
+		MONSTER			= 10,
 	};
 
 };

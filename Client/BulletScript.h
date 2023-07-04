@@ -92,7 +92,7 @@ public:
 			for (auto& obj : queryRet->objectResult)
 			{
 				// monster
-				if (obj.object->Tag() == 10)
+				if (obj.object->Tag() == TAG::MONSTER)
 				{
 					auto body = obj.object->GetComponentRaw<RigidBody2D>();
 					if (std::abs(body->m_desc.dynamic.v.Length()) < 500.0f)

@@ -1,6 +1,7 @@
 #pragma once
 
 #include "Components2D/Script/Script2D.h"
+#include "Components2D/Rendering/SpritesRenderer.h"
 
 using namespace soft;
 
@@ -19,20 +20,26 @@ protected:
 		Base::Trace(tracer);
 	}
 
-	SpritesRenderer* m_renderer;
-	RigidBody2D* m_body;
-	int m_collisionCount = 0;
+	//SpritesRenderer* m_renderer;
+	//RigidBody2D* m_body;
+	//int m_collisionCount = 0;
 
 	GameObject2D* m_wall = 0;
 
 	Vec2 m_pos;
 
+	GameObject2D* m_target = nullptr;
+
 public:
-	virtual void OnStart() override
-	{
-		m_renderer = GetObject()->GetComponent<SpritesRenderer>().Get();
-		m_body = GetObject()->GetComponent<RigidBody2D>().Get();
-	}
+	virtual void OnIdle() {};
+	virtual void OnMove(const Vec2& dir) {};
+
+public:
+	//virtual void OnStart() override
+	//{
+	//	//m_renderer = GetObject()->GetComponent<SpritesRenderer>().Get();
+	//	//m_body = GetObject()->GetComponent<RigidBody2D>().Get();
+	//}
 
 	virtual void OnUpdate(float dt) override
 	{
@@ -43,6 +50,13 @@ public:
 			m_scene->RemoveObject(GetObject());
 			return;
 		}
+
+		if (!m_target)
+		{
+			OnIdle();
+			return;
+		}
+
 
 		if (m_wall)
 		{
@@ -68,9 +82,11 @@ public:
 
 		Position() += dir0 * 200.0f * dt;
 
+		OnMove(dir0);
+
 		m_pos = Position();
 
-		assert(m_collisionCount >= 0);
+		/*assert(m_collisionCount >= 0);
 		if (m_collisionCount)
 		{
 			m_renderer->SetSprite(0);
@@ -78,13 +94,13 @@ public:
 		else
 		{
 			m_renderer->SetSprite(1);
-		}
+		}*/
 	}
 
 	virtual void OnCollisionEnter(GameObject2D* another, const Collision2DPair& pair) override
 	{
 		//m_renderer->SetSprite(0);
-		m_collisionCount++;
+		//m_collisionCount++;
 
 		if (another->Type() == GameObject2D::STATIC)
 		{
@@ -94,17 +110,17 @@ public:
 		//std::cout << "Enter " << m_collisionCount << "\n";
 	}
 
-	virtual void OnCollisionExit(GameObject2D* another, const Collision2DPair& pair) override
-	{
-		//m_renderer->SetSprite(1);
-		m_collisionCount--;
+	//virtual void OnCollisionExit(GameObject2D* another, const Collision2DPair& pair) override
+	//{
+	//	//m_renderer->SetSprite(1);
+	//	//m_collisionCount--;
 
-		/*if (another == m_wall)
-		{
-			m_wall = nullptr;
-		}*/
+	//	/*if (another == m_wall)
+	//	{
+	//		m_wall = nullptr;
+	//	}*/
 
-		//std::cout << "Exit " << m_collisionCount << "\n";
-	}
+	//	//std::cout << "Exit " << m_collisionCount << "\n";
+	//}
 
 };
