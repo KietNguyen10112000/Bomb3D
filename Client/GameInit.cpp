@@ -13,6 +13,8 @@
 
 #include "GameUtils.h"
 
+#include "TAG.h"
+
 using namespace soft;
 
 void AddStaticObjects(Scene2D* scene, byte* mapValues, size_t width, size_t height,
@@ -119,7 +121,8 @@ void AddPlayer(Scene2D* scene, ID id, const Vec2& pos, size_t width, size_t heig
 	crossHairRdr->ClearAABB();
 	player->AddChild(crossHair);
 
-	GameUtils::AddHpBar(player, sf::Color::Green, 70, 100, &script->Data().hp)->Position() = { -10, -25 };
+	GameUtils::AddHpBar(player, script->GetTeamId() == Global::Get().GetMyTeamId() ? sf::Color::Green : sf::Color::Red, 
+		70, 100, &script->DynamicObjectProperties().hp)->Position() = { -10, -20 };
 
 	scene->AddObject(player);
 }
@@ -158,7 +161,7 @@ void AddMapRenderer(Scene2D* scene, const byte* mapValues, size_t width, size_t 
 			);
 		}
 
-		auto animID = rdr->MakeAnimation(spriteFrameIDs, 12, 0.5f);
+		auto animID = rdr->MakeAnimation(spriteFrameIDs, 12, 5.0f);
 		rdr->SetAnimation(animID);
 		scene->AddObject(object);
 	}

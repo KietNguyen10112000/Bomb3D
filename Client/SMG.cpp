@@ -21,7 +21,7 @@ Handle<GameObject2D> SMG::NewBullet(PlayerScript* player, const Vec2& direction)
 	bulletRdr->Sprite().FitTextureSize({ 60, 10 });
 	bulletRdr->Sprite().SetAnchorPoint({ 0.5f, 0.5f });
 
-	bullet->NewComponent<FastBulletScript>()->Setup(player->GetObject(), direction, 3000.0f);
+	bullet->NewComponent<FastBulletScript>()->Setup(player->GetObject(), direction, 3000.0f, 10.0f);
 
 	return bullet;
 }

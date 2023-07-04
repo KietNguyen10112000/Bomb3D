@@ -162,6 +162,7 @@
     <ClInclude Include="..\GameActions\UserInputAction.h" />
     <ClInclude Include="..\Synch\ByteStream.h" />
     <ClInclude Include="..\Synch\Package.h" />
+    <ClInclude Include="BaseDynamicObjectScript.h" />
     <ClInclude Include="BindPython.h" />
     <ClInclude Include="BulletScript.h" />
     <ClInclude Include="DebugRenderer.h" />

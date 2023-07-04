@@ -4,6 +4,6 @@
 
 bool Coin::Use(PlayerScript* player)
 {
-	player->Data().coin += 10;
+	player->PlayerData().coin += 10;
 	return true;
 }

@@ -10,6 +10,8 @@
 #include "UIConsole.h"
 #include "Monster.h"
 
+#include "GameUtils.h"
+
 using namespace soft;
 
 //#include <pybind11/embed.h>
@@ -135,6 +137,10 @@ private:
 
 		monster->Position() = pos;
 		monster->Tag() = 10;
+
+		GameUtils::AddHpBar(monster, sf::Color::Red, 70, 100, &script->DynamicObjectProperties().hp)
+			->Position() = { -35, -40 };
+
 		m_scene->AddObject(monster);
 	}
 
@@ -160,7 +166,7 @@ public:
 			m_showedDebugUI = !m_showedDebugUI;
 		}
 
-		if (Global::Get().setting.isOnRClickToSpawnMonster && Input()->IsKeyPressed('P'))
+		if (Global::Get().setting.isOnRClickToSpawnMonster && Input()->IsKeyUp('P'))
 		{
 			auto& cursorPos = Input()->GetCursor().position;
 			auto center = Global::Get().cam->GetWorldPosition(Vec2(cursorPos.x, cursorPos.y),
@@ -172,7 +178,7 @@ public:
 	inline void ShowMyPlayerInfo()
 	{
 		auto player = Global::Get().GetMyPlayer();
-		auto& playerData = player->Data();
+		auto& playerData = player->PlayerData();
 
 		bool open = true;
 		ImGui::SetNextWindowPos(ImVec2(280, 720 - 55 - 55));
@@ -195,7 +201,7 @@ public:
 		auto rdr = m_scene->GetRenderingSystem();
 
 		auto player = Global::Get().GetMyPlayer();
-		auto& playerData = player->Data();
+		auto& playerData = player->PlayerData();
 
 		bool open = true;
 		ImGui::SetNextWindowPos(ImVec2(280, 720 - 55));

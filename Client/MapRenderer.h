@@ -2,6 +2,7 @@
 
 #include "Components2D/Rendering/Renderer2D.h"
 #include "Components2D/Rendering/Camera2D.h"
+#include "Components2D/Script/Script2D.h"
 
 using namespace soft;
 
@@ -21,6 +22,7 @@ private:
 	Vec2 m_cellSize = {};
 	std::vector<LoadedSprite> m_sprites;
 
+	size_t m_playedCount = 0;
 	AnimatedSprites* m_itemSprites[NUM_ICON_LAYERS][256] = {};
 
 	int m_itemSpriteLayer[GameMap::MAX_SIZE * GameMap::MAX_SIZE] = {};
@@ -108,13 +110,18 @@ public:
 		beginY = clamp(beginY, (intmax_t)0, (intmax_t)m_height);
 		endY = clamp(endY, (intmax_t)0, (intmax_t)m_height);
 
-		for (size_t i = 0; i < 256; i++)
+		auto count = GetObject()->GetScene()->GetIterationCount();
+		if (m_playedCount != count)
 		{
-			for (size_t j = 0; j < NUM_ICON_LAYERS; j++)
+			for (size_t i = 0; i < 256; i++)
 			{
-				if (m_itemSprites[j][i])
-					m_itemSprites[j][i]->Play(0.016f);
+				for (size_t j = 0; j < NUM_ICON_LAYERS; j++)
+				{
+					if (m_itemSprites[j][i])
+						m_itemSprites[j][i]->Play(0.016f);
+				}
 			}
+			m_playedCount = count;
 		}
 
 		for (size_t y = beginY; y < endY; y++)

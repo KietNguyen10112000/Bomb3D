@@ -6,11 +6,13 @@ using namespace soft;
 
 #include "Global.h"
 
-class Monster : Traceable<Monster>, public Script2D
+#include "BaseDynamicObjectScript.h"
+
+class Monster : Traceable<Monster>, public BaseDynamicObjectScript
 {
 protected:
 	SCRIPT2D_DEFAULT_METHOD(Monster);
-	using Base = Script2D;
+	using Base = BaseDynamicObjectScript;
 	TRACEABLE_FRIEND();
 	void Trace(Tracer* tracer)
 	{

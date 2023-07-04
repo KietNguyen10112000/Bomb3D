@@ -11,6 +11,8 @@
 #include "Objects2D/Physics/Colliders/RectCollider.h"
 
 #include "TAG.h"
+#include "PlayerScript.h"
+#include "Monster.h"
 
 using namespace soft;
 
@@ -72,6 +74,7 @@ protected:
 	Handle<GameObject2D>	m_from;
 	Vec2					m_dir;
 	float					m_speed;
+	float					m_damage;
 
 public:
 	virtual void OnUpdate(float dt) override
@@ -94,9 +97,11 @@ public:
 					auto body = obj.object->GetComponentRaw<RigidBody2D>();
 					if (std::abs(body->m_desc.dynamic.v.Length()) < 500.0f)
 					{
+						v = v * 0.5f;
 						body->ApplyForce({}, m_dir * v);
-						v = v * 0.8f;
 					}
+
+					obj.object->GetComponentRaw<Monster>()->TakeDamage(m_from, m_damage);
 				}
 			}
 			
@@ -105,13 +110,24 @@ public:
 			{
 				m_scene->RemoveObject(GetObject());
 			}
+			else
+			{
+				auto player = obj.object->GetComponentRaw<PlayerScript>();
+				if (player->GetTeamId()
+					!= m_from->GetComponentRaw<PlayerScript>()->GetTeamId())
+				{
+					player->TakeDamage(m_from, m_damage);
+					m_scene->RemoveObject(GetObject());
+				}
+			}
 		}
 	}
 
-	inline void Setup(const Handle<GameObject2D>& obj, const Vec2& dir, float speed)
+	inline void Setup(const Handle<GameObject2D>& obj, const Vec2& dir, float speed, float damage)
 	{
 		m_from = obj;
 		m_dir = dir;
 		m_speed = speed;
+		m_damage = damage;
 	}
 };

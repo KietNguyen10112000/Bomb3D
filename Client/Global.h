@@ -48,6 +48,11 @@ struct Global
 		return players[userId];
 	}
 
+	inline auto GetMyTeamId()
+	{
+		return userId % 2;
+	}
+
 	inline void ExecuteAction(Action* action)
 	{
 		actionCount++;

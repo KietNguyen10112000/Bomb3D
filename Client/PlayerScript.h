@@ -12,7 +12,7 @@
 #include "Input/Input.h"
 #include "Input/KEYBOARD.h"
 
-#include "BulletScript.h"
+//#include "BulletScript.h"
 
 #include "GameActions/UserInputAction.h"
 
@@ -25,21 +25,21 @@
 #include "Skill.h"
 #include "Flash.h"
 #include "SMG.h"
+#include "BaseDynamicObjectScript.h"
 
 using namespace soft;
 
-class PlayerScript : Traceable<PlayerScript>, public Script2D
+class PlayerScript : Traceable<PlayerScript>, public BaseDynamicObjectScript
 {
 public:
 	struct PlayerData
 	{
-		float hp = 100.0f;
 		size_t coin = 0;
 	};
 
 protected:
 	SCRIPT2D_DEFAULT_METHOD(PlayerScript);
-	using Base = Script2D;
+	using Base = BaseDynamicObjectScript;
 	TRACEABLE_FRIEND();
 	void Trace(Tracer* tracer)
 	{
@@ -417,7 +417,7 @@ public:
 		}
 	}
 
-	inline auto& Data()
+	inline auto& PlayerData()
 	{
 		return m_data;
 	}
