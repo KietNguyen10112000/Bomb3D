@@ -15,6 +15,7 @@ public:
 	static UIConsole* New();
 	static void Delete(UIConsole* console);
 
+	virtual ~UIConsole() {};
 	virtual void RenderConsole(Scene2D* scene) = 0;
 
 };

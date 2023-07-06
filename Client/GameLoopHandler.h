@@ -59,7 +59,7 @@ class GameLoopHandler : public IterationHandler
 	bool							m_isMatchedSuccess = false;
 
 public:
-	UserInput m_userInput[10];
+	UserInput m_userInput[GameConfig::MAX_PLAYERS];
 
 	~GameLoopHandler()
 	{
@@ -86,6 +86,19 @@ public:
 	}
 
 private:
+	inline void UpdatePathFinders(PathFinder* (&list)[GameConfig::MAX_PLAYERS])
+	{
+		auto iter = Global::Get().activeScene->GetIterationCount();
+		auto step = Global::Get().setting.pathFinderUpdateStep;
+		for (auto& e : list)
+		{
+			if (e)
+			{
+				e->Update(iter, step);
+			}
+		}
+	}
+
 	inline void FixedIteration(float dt, Scene2D* scene)
 	{
 		Global::Get().actionCount = 0;
@@ -98,10 +111,8 @@ private:
 		ComsumeAction(scene);
 		scene->LockDt(dt);
 
-		Global::Get().gameMap.m_pathFinder.Update(
-			Global::Get().activeScene->GetIterationCount(), 
-			Global::Get().setting.pathFinderUpdateStep
-		);
+		UpdatePathFinders(Global::Get().gameMap.m_playerPathFinders);
+		UpdatePathFinders(Global::Get().gameMap.m_victoryTowersPathFinder);
 
 		scene->PrevIteration();
 		scene->Iteration();
@@ -277,6 +288,23 @@ public:
 				[](int argc, void** argv, void* a)
 				{
 					MatchStartAction* matchStart = (MatchStartAction*)a;
+
+					String ownIP = Global::Get().connector->GetAddressString();
+					std::cout << "Player address: " << ownIP << "\n";
+
+					auto& clients = matchStart->m_clientInfo;
+					auto clientCount = matchStart->m_numClient;
+					Global::Get().activePlayerCount = clientCount;
+					for (size_t i = 0; i < clientCount; i++)
+					{
+						auto& client = clients[i];
+						if (i == matchStart->m_userID)
+						{
+							std::cout << "Player id: " << client.id << "\n";
+							Global::Get().userId = client.id;
+						}
+					}
+
 					AddStaticObjects((Scene2D*)argv[1], 
 						matchStart->m_map, matchStart->m_width, matchStart->m_height,
 						matchStart->m_blockCellValues, matchStart->m_numBlockCell);
@@ -294,20 +322,8 @@ public:
 					auto scene = (Scene2D*)argv[1];
 					MatchStartAction* matchStart = (MatchStartAction*)a;
 
-					String ownIP = Global::Get().connector->GetAddressString();
-					std::cout << "Player address: " << ownIP << "\n";
-
 					auto& clients = matchStart->m_clientInfo;
 					auto clientCount = matchStart->m_numClient;
-					for (size_t i = 0; i < clientCount; i++)
-					{
-						auto& client = clients[i];
-						if (i == matchStart->m_userID)
-						{
-							std::cout << "Player id: " << client.id << "\n";
-							Global::Get().userId = client.id;
-						}
-					}
 
 					for (size_t i = 0; i < clientCount; i++)
 					{

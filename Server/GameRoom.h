@@ -17,7 +17,7 @@
 class GameRoom
 {
 public:
-	constexpr static size_t MAX_CLIENTS					= 10;
+	constexpr static size_t MAX_CLIENTS					= GameActionConfig::MAX_CLIENTS;
 
 	constexpr static size_t NUM_TICKS_PER_SEND			= GameActionConfig::ServerConfig::NUM_TICKS_PER_SYNCH;
 

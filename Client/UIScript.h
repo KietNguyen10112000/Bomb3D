@@ -89,6 +89,8 @@ private:
 
 	void RenderConsole()
 	{
+		if (!m_console) return;
+
 		m_console->m_isCaptureStdOut = Global::Get().setting.isCaptureSTDCout;
 		if (!Global::Get().setting.isOnConsole)
 		{

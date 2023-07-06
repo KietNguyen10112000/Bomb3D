@@ -1,3 +1,5 @@
+#ifdef CONSOLE
+
 #include "BindPython.h"
 
 #include <pybind11/embed.h>
@@ -86,3 +88,6 @@ void BindPython()
         game.path = game.PathDebugAccessor()
     )#");
 }
+
+
+#endif // CONSOLE

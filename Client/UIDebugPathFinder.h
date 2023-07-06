@@ -34,7 +34,17 @@ public:
 			return;
 		}
 
-		auto prevCells = Global::Get().gameMap.m_pathFinder.m_prev;
+		auto idx = Global::Get().setting.debugPathfinderLayer % GameConfig::MAX_PLAYERS;
+
+		auto** list = Global::Get().gameMap.m_playerPathFinders;
+		if (Global::Get().setting.debugPathfinderLayer > GameConfig::MAX_PLAYERS)
+		{
+			list = Global::Get().gameMap.m_victoryTowersPathFinder;
+		}
+
+		auto pathFinder = list[idx];
+
+		auto prevCells = pathFinder->m_prev;
 		auto movable = Global::Get().gameMap.m_movable;
 
 		Vec2 temp[4];

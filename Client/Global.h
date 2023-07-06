@@ -36,13 +36,15 @@ struct Global
 	uint32_t actionCount = 0;
 	ByteStream* actionStream;
 
+	size_t activeTeamCount = 2;
+	size_t activePlayerCount = 0;
 	size_t userId = 0;
 
 	Scene2D* activeScene;
 	GameSetting setting;
 	GameMap gameMap;
 	Camera2D* cam;
-	PlayerScript* players[10] = {};
+	PlayerScript* players[GameConfig::MAX_PLAYERS] = {};
 
 	ProcRandom procRandom = {};
 

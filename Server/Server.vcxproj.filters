@@ -72,6 +72,9 @@
     <ClInclude Include="MazeGenerator.h">
       <Filter>Source Files\Game</Filter>
     </ClInclude>
+    <ClInclude Include="ServerConfig.h">
+      <Filter>Source Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="..\DebugView.natvis">

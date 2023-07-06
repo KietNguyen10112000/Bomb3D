@@ -13,6 +13,8 @@
 
 #include "GameActions/GameActions.h"
 
+#include "ServerConfig.h"
+
 constexpr static size_t TIME_IDLE = 15; // ms
 
 void InitConsole(Engine* engine)
@@ -145,7 +147,7 @@ inline void AcceptClient(void*)
 			std::cout << "Client connected\n";
 			room.m_clientsCount++;
 
-			if (room.m_clientsCount == 2)
+			if (room.m_clientsCount == ServerConfig::NUM_PLAYER_PER_ROOM)
 			{
 				room.m_abortCallback = [](void*)
 				{

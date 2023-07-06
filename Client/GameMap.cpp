@@ -1,9 +1,12 @@
 #include "GameMap.h"
 #include "Item.h"
 
+#include "Global.h"
+
 GameMap::~GameMap()
 {
 	FinalizeItems();
+	FinalizePathFinders();
 }
 
 void GameMap::Initialize(MatchStartAction* matchStart)
@@ -23,6 +26,9 @@ void GameMap::Initialize(MatchStartAction* matchStart)
 
 	m_width = w;
 	m_height = h;
+	m_maxPos.x = (float)w * GameConfig::CELL_SIZE;
+	m_maxPos.y = (float)h * GameConfig::CELL_SIZE;
+
 	for (size_t y = 0; y < h; y++)
 	{
 		auto yy = y * w;
@@ -43,9 +49,43 @@ void GameMap::Initialize(MatchStartAction* matchStart)
 		}
 	}
 
-	m_pathFinder.Initialize(m_movable, w, h);
+	//m_pathFinder.Initialize(m_movable, w, h);
+
+	InitializePathFinders();
 
 	InitializeItems();
+}
+
+void GameMap::InitializePathFinders()
+{
+	auto count = Global::Get().activePlayerCount;
+	for (size_t i = 0; i < count; i++)
+	{
+		auto& pathFinder = m_playerPathFinders[i];
+		pathFinder = new PathFinder();
+		pathFinder->Initialize(m_movable, m_width, m_height);
+	}
+
+	count = Global::Get().activeTeamCount;
+	for (size_t i = 0; i < count; i++)
+	{
+		auto& pathFinder = m_victoryTowersPathFinder[i];
+		pathFinder = new PathFinder();
+		pathFinder->Initialize(m_movable, m_width, m_height);
+	}
+}
+
+void GameMap::FinalizePathFinders()
+{
+	for (auto& e : m_playerPathFinders)
+	{
+		if (e) delete e;
+	}
+
+	for (auto& e : m_victoryTowersPathFinder)
+	{
+		if (e) delete e;
+	}
 }
 
 void GameMap::InitializeItems()

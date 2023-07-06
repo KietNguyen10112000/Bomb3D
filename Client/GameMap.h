@@ -21,6 +21,8 @@ public:
 	size_t m_width = 0;
 	size_t m_height = 0;
 
+	Vec2 m_maxPos = {};
+
 	// 1 - movable, 0 - unmovable
 	bool m_movable[MAX_SIZE * MAX_SIZE] = {};
 
@@ -28,11 +30,17 @@ public:
 
 	Item* m_items[256] = {};
 
-	PathFinder m_pathFinder;
+	// each player contains 1 path finder
+	PathFinder* m_playerPathFinders[GameConfig::MAX_PLAYERS] = {};
+
+	// each team contains 1 path finder for victory tower
+	PathFinder* m_victoryTowersPathFinder[GameConfig::MAX_PLAYERS] = {};
 
 	~GameMap();
 
 	void Initialize(MatchStartAction* matchStart);
+	void InitializePathFinders();
+	void FinalizePathFinders();
 	void InitializeItems();
 	void FinalizeItems();
 
@@ -46,7 +54,7 @@ public:
 
 	inline ID GetItemID(const Vec2& pos)
 	{
-		auto cell = m_pathFinder.GetCell(pos);
+		auto cell = m_playerPathFinders[0]->GetCell(pos);
 		if (m_movable[cell.idx] && m_cells[cell.idx].itemId != ((byte)-1))
 			return m_cells[cell.idx].itemId;
 
@@ -65,7 +73,12 @@ public:
 
 	inline void ClearItem(const Vec2& pos)
 	{
-		auto cell = m_pathFinder.GetCell(pos);
+		auto cell = m_playerPathFinders[0]->GetCell(pos);
 		m_cells[cell.idx].itemId = ((byte)-1);
+	}
+
+	inline auto IsOutside(const Vec2& pos)
+	{
+		return pos.x < 0 || pos.y < 0 || pos.x > m_maxPos.x || pos.y > m_maxPos.y;
 	}
 };

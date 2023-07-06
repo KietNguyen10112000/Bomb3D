@@ -28,7 +28,7 @@ protected:
 
 	Vec2 m_pos;
 
-	GameObject2D* m_target = nullptr;
+	PathFinder* m_target = nullptr;
 
 public:
 	virtual void OnIdle() {};
@@ -43,9 +43,8 @@ public:
 
 	virtual void OnUpdate(float dt) override
 	{
-		auto dir0 = Global::Get().gameMap.m_pathFinder.GetDir(Position());
-
-		if (dir0 == Vec2::ZERO)
+		auto& map = Global::Get().gameMap;
+		if (map.IsOutside(Position()) || !map.IsMovable(Position()))
 		{
 			m_scene->RemoveObject(GetObject());
 			return;
@@ -57,6 +56,13 @@ public:
 			return;
 		}
 
+		auto dir0 = m_target->GetDir(Position());
+
+		if (dir0 == Vec2::ZERO)
+		{
+			m_scene->RemoveObject(GetObject());
+			return;
+		}
 
 		if (m_wall)
 		{

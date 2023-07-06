@@ -1,5 +1,7 @@
 #include "UIConsole.h"
 
+#ifdef CONSOLE
+
 #include <streambuf>
 #include <sstream>
 #include <vector>
@@ -273,8 +275,19 @@ UIConsole* UIConsole::New()
 {
 	return new UIConsoleImpl();
 }
+#else
+UIConsole* UIConsole::New()
+{
+	return nullptr;
+}
+#endif
 
 void UIConsole::Delete(UIConsole* console)
 {
-	delete ((UIConsoleImpl*)console);
+	if (!console)
+	{
+		return;
+	}
+
+	delete console;
 }
