@@ -15,4 +15,6 @@ struct GameSetting
 	bool					isCaptureSTDCout				= false;
 	size_t					debugPathfinderLayer			= 0;
 	size_t					pathFinderUpdateStep			= 500;
+
+	bool					isShowChooseBuildingUI			= false;
 };

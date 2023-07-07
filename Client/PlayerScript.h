@@ -6,8 +6,9 @@
 #include "Components2D/Physics/Physics2D.h"
 #include "Components2D/Physics/RigidBody2D.h"
 
-#include "Objects2D/Physics/Colliders/AARectCollider.h"
-#include "Objects2D/Physics/Colliders/RectCollider.h"
+//#include "Objects2D/Physics/Colliders/AARectCollider.h"
+//#include "Objects2D/Physics/Colliders/RectCollider.h"
+#include "Objects2D/Physics/Colliders/CircleCollider.h"
 
 #include "Input/Input.h"
 #include "Input/KEYBOARD.h"
@@ -26,12 +27,19 @@
 #include "Flash.h"
 #include "SMG.h"
 #include "BaseDynamicObjectScript.h"
+#include "TAG.h"
+#include "Monster.h"
+
+#include "ObjectGeneratorId.h"
+#include "ObjectGenerator.h"
 
 using namespace soft;
 
 class PlayerScript : Traceable<PlayerScript>, public BaseDynamicObjectScript
 {
 public:
+	constexpr static size_t TICKS_TO_UPDATE_PATHFINDER = 15;
+
 	struct PlayerData
 	{
 		size_t coin = 0;
@@ -50,6 +58,7 @@ protected:
 		tracer->Trace(m_redLine);
 		tracer->Trace(m_skills);
 		tracer->Trace(m_skillsUI);
+		tracer->Trace(m_skillsUIObject);
 		tracer->Trace(m_guns);
 	}
 
@@ -59,7 +68,7 @@ protected:
 	Handle<GameObject2D>			m_redLine;
 	Handle<GameObject2D>			m_crossHair;
 
-	SharedPtr<RectCollider>			m_bulletCollider;
+	//SharedPtr<RectCollider>			m_bulletCollider;
 
 public:
 	UserInputAction m_inputAction;
@@ -89,10 +98,19 @@ public:
 
 	Handle<Skill> m_skills[5];
 	Handle<Renderer2D> m_skillsUI[5];
+	Handle<GameObject2D> m_skillsUIObject[5];
 	size_t m_curSkillIdx = INVALID_ID;
 
 	Handle<Gun> m_guns[2];
 	size_t m_curGunId = 0;
+
+	PathFinder* m_pathFinder = nullptr;
+	Vec2 m_lastPosUpdatePathFinder = { 0,0 };
+	size_t m_updatePathFinderCount = 0;
+	CircleCollider m_circleCollider = { Vec2(0,0), 3.0f * GameConfig::CELL_SIZE };
+
+	//SpriteRenderer* m_buildingUI = nullptr;
+	GameObject2D* m_buildingUI = nullptr;
 
 	inline void RecordInputAction()
 	{
@@ -113,6 +131,7 @@ public:
 		m_input->SetKey('D', Input()->IsKeyDown('D'));
 		m_input->SetKey(KEYBOARD::MOUSE_LEFT, Input()->IsKeyDown(KEYBOARD::MOUSE_LEFT));
 		m_input->SetKey(KEYBOARD::MOUSE_RIGHT, Input()->IsKeyDown(KEYBOARD::MOUSE_RIGHT));
+		m_input->SetKey(KEYBOARD::SPACE, Input()->IsKeyDown(KEYBOARD::SPACE));
 
 		auto& cursorPos = Input()->GetCursor().position;
 		auto center = m_cam->GetWorldPosition(Vec2(cursorPos.x, cursorPos.y),
@@ -201,6 +220,7 @@ public:
 		m_curSkillIdx = 0;
 		m_skills[0] = flash;
 		m_skillsUI[0] = flashUI->GetComponent<Renderer2D>();
+		m_skillsUIObject[0] = flashUI;
 	}
 
 	inline void InitTestGun()
@@ -209,10 +229,25 @@ public:
 		m_curGunId = 0;
 	}
 
+	inline void InitBuildingUI()
+	{
+		auto buildingUI = mheap::New<GameObject2D>(GameObject2D::DYNAMIC);
+		auto renderer = buildingUI->NewComponent<SpriteRenderer>("buildings/wall3x1.png", AARect(), Transform2D());
+		renderer->Sprite().FitTextureSize({ 3 * GameConfig::CELL_SIZE, GameConfig::CELL_SIZE });
+		renderer->ClearAABB();
+		renderer->SetVisible(false);
+		renderer->Sprite().SetAnchorPoint({ 0.5f,0.5f });
+
+		m_buildingUI = buildingUI;
+		
+		GetObject()->AddChild(buildingUI);
+	}
+
 	virtual void OnStart() override
 	{
 		InitTestSkill();
 		InitTestGun();
+		InitBuildingUI();
 
 		m_gun = m_guns[m_curGunId]->GetGunObject(this);
 		GetObject()->AddChild(m_gun);
@@ -235,10 +270,11 @@ public:
 
 		Input()->SetClampCursorInsideWindow(m_enableMouse);
 
-		m_bulletCollider = MakeShared<RectCollider>(Rect(-30, -5, 60, 10));
+		//m_bulletCollider = MakeShared<RectCollider>(Rect(-30, -5, 60, 10));
 
 		m_gunRecoilEnd = m_gun->Position();
 
+		m_pathFinder = Global::Get().gameMap.GetPlayerPathFinder(m_userId);
 	}
 
 	inline void MovePlayer(float dt)
@@ -288,7 +324,10 @@ public:
 		curSkillUI->SetVisible(false);
 		if (curSkill->m_coolDown == 0 && m_input->IsKeyDown(KEYBOARD::MOUSE_RIGHT))
 		{
-			curSkillUI->SetVisible(true);
+			if (Global::Get().GetMyPlayer() == this)
+			{
+				curSkillUI->SetVisible(true);
+			}
 		}
 
 		if (curSkill->m_coolDown != 0 && curSkill->IsReady())
@@ -306,6 +345,58 @@ public:
 			{
 				curSkill->m_coolDown = curSkill->GetCooldownTime();
 			}
+		}
+	}
+
+	inline void UpdatePathFinder()
+	{
+		if (m_lastPosUpdatePathFinder != Position() && (m_updatePathFinderCount++) % TICKS_TO_UPDATE_PATHFINDER == 0)
+		{
+			auto& pathFinder = m_pathFinder;
+			pathFinder->Find(GetScene()->GetIterationCount(), pathFinder->GetCell(Position()));
+			m_lastPosUpdatePathFinder = Position();
+		}
+	}
+
+	inline void ActivateNearMonsters()
+	{
+		auto info = Physics()->ColliderQuery(&m_circleCollider, GetObject()->GlobalTransform());
+		if (info)
+		{
+			for (auto& object : info->Results())
+			{
+				if (object->Tag() == TAG::MONSTER)
+				{
+					object->GetComponentRaw<Monster>()->SetTarget(m_pathFinder);
+				}
+			}
+		}
+	}
+
+	inline void CheckBuildObjects(float dt)
+	{
+		// show UI
+		if (m_input->IsKeyDown(KEYBOARD::SPACE))
+		{
+			if (Global::Get().GetMyPlayer() == this)
+			{
+				m_buildingUI->GetComponentRaw<Renderer2D>()->SetVisible(true);
+			}
+
+			auto pos = Vec2(100, 0);
+			pos = (Vec3(pos, 1.0f) * Mat3::Rotation(m_input->m_synchRotation)).xy();
+			m_buildingUI->Transform().Translation() = pos + Vec2(25, 25);
+			m_buildingUI->Transform().Rotation() = m_input->m_synchRotation + PI / 2.0f;
+		}
+
+		if (m_input->IsKeyUp(KEYBOARD::SPACE))
+		{
+			m_buildingUI->GetComponentRaw<Renderer2D>()->SetVisible(false);
+
+			auto object = ObjectGenerator::NewObject(ObjectGeneratorId::WALL3x1);
+			object->Transform().Translation() = m_buildingUI->GlobalTransform().GetTranslation();
+			object->Transform().Rotation() = m_buildingUI->GlobalTransform().GetRotation();
+			GetScene()->AddObject(object);
 		}
 	}
 
@@ -328,8 +419,6 @@ public:
 		{
 			MovePlayer(dt);
 		}
-
-		UseSkill(dt);
 
 		{
 			m_recoil = std::max(m_recoil - dt, 0.0f);
@@ -356,7 +445,11 @@ public:
 			m_crossHair->Position() = m_crossHairPos;
 		}
 
+		CheckBuildObjects(dt);
+		UseSkill(dt);
 		CheckPickItem();
+		UpdatePathFinder();
+		ActivateNearMonsters();
 
 		if (m_userId == Global::Get().userId)
 		{

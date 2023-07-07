@@ -2,6 +2,8 @@
 #include "Engine/ENGINE_EVENT.h"
 
 #include "Components2D/Rendering/AnimatedSpritesRenderer.h"
+#include "Objects2D/Physics/Colliders/AARectCollider.h"
+#include "Objects2D/Physics/Colliders/RectCollider.h"
 
 #include "PlayerScript.h"
 #include "UIScript.h"
@@ -10,7 +12,8 @@
 #include "DebugRenderer.h"
 #include "GameUtils.h"
 #include "TAG.h"
-#include "MonsterGenerator.h"
+#include "COLLISION_MASK.h"
+#include "ObjectGenerator.h"
 
 using namespace soft;
 
@@ -53,7 +56,7 @@ void AddStaticObjects(Scene2D* scene, byte* mapValues, size_t width, size_t heig
 				// add static object as blocked cell
 				auto object = mheap::New<GameObject2D>(GameObject2D::STATIC);
 				object->NewComponent<Physics2D>(cellCollider)
-					->CollisionMask() = 1ull | (1ull << 2) | (1ull << 3);
+					->CollisionMask() = COLLISION_MASK::WALL;
 				object->Position() = { x * 60, y * 60 };
 				scene->AddObject(object);
 			}
@@ -72,6 +75,7 @@ void AddPlayer(Scene2D* scene, ID id, const Vec2& pos, size_t width, size_t heig
 	sprites->Load(String::Format("PlayerDOWN_{}.png", id), AARect(), Vec2(50, 50));
 	sprites->Load(String::Format("PlayerLEFT_{}.png", id), AARect(), Vec2(50, 50));
 	sprites->Load(String::Format("PlayerRIGHT_{}.png", id), AARect(), Vec2(50, 50));
+	sprites->ClearAABB();
 
 	auto script = player->NewComponent<PlayerScript>();
 	script->SetUserId(id);
@@ -79,7 +83,7 @@ void AddPlayer(Scene2D* scene, ID id, const Vec2& pos, size_t width, size_t heig
 
 	auto cellCollider = MakeShared<AARectCollider>(AARect({ 0,0 }, { 50,50 }), Vec2(5, 5));
 	player->NewComponent<RigidBody2D>(RigidBody2D::KINEMATIC, cellCollider)
-		->CollisionMask() = (1ull << 2);
+		->CollisionMask() = COLLISION_MASK::PLAYER;
 
 
 	if (Global::Get().userId == id)
@@ -180,7 +184,7 @@ void AddMapMonsters(Scene2D* scene, const byte* mapMonsterIds, size_t width, siz
 		for (size_t x = 0; x < width; x++)
 		{
 			auto monsterId = row[x];
-			auto monster = MonsterGenerator::NewMonster(monsterId);
+			auto monster = ObjectGenerator::NewObject(monsterId);
 			if (monster)
 			{
 				monster->Position() = { x * GameConfig::CELL_SIZE, y * GameConfig::CELL_SIZE };

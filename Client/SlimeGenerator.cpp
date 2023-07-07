@@ -5,7 +5,10 @@
 
 #include "Monster.h"
 #include "TAG.h"
+#include "COLLISION_MASK.h"
 #include "GameUtils.h"
+
+#include "Stopwatch.h"
 
 class SlimeScript : Traceable<SlimeScript>, public Monster
 {
@@ -24,15 +27,19 @@ protected:
 	}
 
 	AnimatedSpritesRenderer* m_renderer = nullptr;
+	Renderer2D* m_hpBar = nullptr;
+	Stopwatch m_hideHpBarStopwatch = {};
 	ID m_curAnimId = INVALID_ID;
 
 public:
-	virtual void OnStart()
+	virtual void OnStart() override
 	{
 		m_renderer = GetObject()->GetComponentRaw<AnimatedSpritesRenderer>();
+		m_hpBar = GetObject()->Child(0)->GetComponentRaw<Renderer2D>();
+		m_hpBar->SetVisible(false);
 	}
 
-	virtual void OnIdle() 
+	virtual void OnIdle() override
 	{
 		if (m_curAnimId != IDLE_ANIMATION_ID)
 		{
@@ -41,7 +48,18 @@ public:
 		}
 	};
 
-	virtual void OnMove(const Vec2& dir) 
+	virtual void OnUpdate(float dt) override
+	{
+		Base::OnUpdate(dt);
+		m_hideHpBarStopwatch.Update(dt);
+
+		if (m_hideHpBarStopwatch.IsTimeout())
+		{
+			m_hpBar->SetVisible(false);
+		}
+	}
+
+	virtual void OnMove(const Vec2& dir) override
 	{
 		if (dir.x > 0)
 		{
@@ -60,6 +78,13 @@ public:
 			}
 		}
 	};
+
+	virtual void OnTakeDamage(GameObject2D* from, float many) override
+	{
+		m_hpBar->SetVisible(true);
+
+		m_hideHpBarStopwatch.Start(3.0f);
+	}
 
 };
 
@@ -113,7 +138,7 @@ Handle<GameObject2D> SlimeGenerator::New()
 	renderer->ClearAABB();
 	renderer->SetAnimation(SlimeScript::IDLE_ANIMATION_ID);
 
-	physics->CollisionMask() = (1ull << 2);
+	physics->CollisionMask() = COLLISION_MASK::MONSTER;
 
 	monster->Tag() = TAG::MONSTER;
 

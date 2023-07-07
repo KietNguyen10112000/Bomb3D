@@ -33,10 +33,31 @@ public:
 					continue;
 				}
 
-				if (Random::RangeInt32(0, 20) == 0)
+				if (Random::RangeInt32(0, 5) == 0)
 				{
 					row[x] = 1;
 				}
+			}
+		}
+
+		// no monsters at players start location
+		for (size_t y = 0; y < 10; y++)
+		{
+			auto idy = y * width;
+			auto row = &monsters[idy];
+			for (size_t x = 0; x < 10; x++)
+			{
+				row[x] = 255;
+			}
+		}
+
+		for (size_t y = height - 10; y < height; y++)
+		{
+			auto idy = y * width;
+			auto row = &monsters[idy];
+			for (size_t x = width - 10; x < width; x++)
+			{
+				row[x] = 255;
 			}
 		}
 	}

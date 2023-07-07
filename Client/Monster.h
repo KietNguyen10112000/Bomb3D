@@ -30,6 +30,8 @@ protected:
 
 	PathFinder* m_target = nullptr;
 
+	float m_speed = 200.0f;
+
 public:
 	virtual void OnIdle() {};
 	virtual void OnMove(const Vec2& dir) {};
@@ -60,7 +62,7 @@ public:
 
 		if (dir0 == Vec2::ZERO)
 		{
-			m_scene->RemoveObject(GetObject());
+			//m_scene->RemoveObject(GetObject());
 			return;
 		}
 
@@ -86,7 +88,7 @@ public:
 			dir0.Normalize();
 		}
 
-		Position() += dir0 * 200.0f * dt;
+		Position() += dir0 * m_speed * dt;
 
 		OnMove(dir0);
 
@@ -128,5 +130,10 @@ public:
 
 	//	//std::cout << "Exit " << m_collisionCount << "\n";
 	//}
+
+	void SetTarget(PathFinder* target)
+	{
+		m_target = target;
+	}
 
 };

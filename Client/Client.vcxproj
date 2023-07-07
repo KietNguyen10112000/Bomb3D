@@ -152,10 +152,11 @@
     <ClCompile Include="Item.cpp" />
     <ClCompile Include="ItemIconLoader.cpp" />
     <ClCompile Include="main.cpp" />
-    <ClCompile Include="MonsterGenerator.cpp" />
+    <ClCompile Include="ObjectGenerator.cpp" />
     <ClCompile Include="SlimeGenerator.cpp" />
     <ClCompile Include="SMG.cpp" />
     <ClCompile Include="UIConsole.cpp" />
+    <ClCompile Include="Wall3x1Generator.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\GameActions\GameActionConfig.h" />
@@ -167,6 +168,7 @@
     <ClInclude Include="BaseDynamicObjectScript.h" />
     <ClInclude Include="BindPython.h" />
     <ClInclude Include="BulletScript.h" />
+    <ClInclude Include="COLLISION_MASK.h" />
     <ClInclude Include="DebugRenderer.h" />
     <ClInclude Include="Flash.h" />
     <ClInclude Include="GameConfig.h" />
@@ -176,7 +178,8 @@
     <ClInclude Include="GameUtils.h" />
     <ClInclude Include="Global.h" />
     <ClInclude Include="GameLoopHandler.h" />
-    <ClInclude Include="MonsterGenerator.h" />
+    <ClInclude Include="ObjectGenerator.h" />
+    <ClInclude Include="ObjectGeneratorId.h" />
     <ClInclude Include="ProcessBarRenderer.h" />
     <ClInclude Include="InGameAPI.h" />
     <ClInclude Include="ItemIconLoader.h" />
@@ -189,11 +192,13 @@
     <ClInclude Include="Skill.h" />
     <ClInclude Include="SlimeGenerator.h" />
     <ClInclude Include="SMG.h" />
+    <ClInclude Include="Stopwatch.h" />
     <ClInclude Include="TAG.h" />
     <ClInclude Include="UIConsole.h" />
     <ClInclude Include="UIDebugPathFinder.h" />
     <ClInclude Include="UIScript.h" />
     <ClInclude Include="Gun.h" />
+    <ClInclude Include="Wall3x1Generator.h" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="..\DebugView.natvis" />

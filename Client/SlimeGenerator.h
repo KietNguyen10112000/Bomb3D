@@ -1,5 +1,5 @@
 #pragma once
-#include "MonsterGenerator.h"
+#include "ObjectGenerator.h"
 
 #include "Core/Memory/SmartPointers.h"
 
@@ -7,7 +7,7 @@
 
 using namespace soft;
 
-class SlimeGenerator : public MonsterGenerator
+class SlimeGenerator : public ObjectGenerator
 {
 private:
 	SharedPtr<CircleCollider> m_collider;

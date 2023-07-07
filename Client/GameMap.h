@@ -38,12 +38,16 @@ public:
 
 	~GameMap();
 
+private:
+	friend class GameLoopHandler;
+	
 	void Initialize(MatchStartAction* matchStart);
 	void InitializePathFinders();
 	void FinalizePathFinders();
 	void InitializeItems();
 	void FinalizeItems();
 
+public:
 	inline bool IsMovable(const Vec2& pos) const
 	{
 		auto x = (size_t)std::floor(pos.x / (float)GameConfig::CELL_SIZE);
@@ -80,5 +84,15 @@ public:
 	inline auto IsOutside(const Vec2& pos)
 	{
 		return pos.x < 0 || pos.y < 0 || pos.x > m_maxPos.x || pos.y > m_maxPos.y;
+	}
+
+	inline auto& GetPlayerPathFinder(ID userId)
+	{
+		return m_playerPathFinders[userId];
+	}
+
+	inline auto& GetTeamPathFinder(ID teamId)
+	{
+		return m_victoryTowersPathFinder[teamId];
 	}
 };

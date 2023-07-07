@@ -4,18 +4,18 @@
 
 using namespace soft;
 
-class MonsterGenerator
+class ObjectGenerator
 {
 private:
-	static MonsterGenerator* s_generators[256];
+	static ObjectGenerator* s_generators[256];
 
 public:
 	static void Initialize();
 	static void Finalize();
 
-	static Handle<GameObject2D> NewMonster(byte monsterId)
+	static Handle<GameObject2D> NewObject(ID id)
 	{
-		auto& gen = s_generators[monsterId];
+		auto& gen = s_generators[id];
 		if (!gen)
 		{
 			return nullptr;
@@ -24,7 +24,7 @@ public:
 	}
 
 public:
-	virtual ~MonsterGenerator() {};
+	virtual ~ObjectGenerator() {};
 
 	virtual Handle<GameObject2D> New() = 0;
 

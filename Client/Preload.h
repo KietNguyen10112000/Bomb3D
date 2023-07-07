@@ -2,7 +2,7 @@
 
 #include "ItemIconLoader.h"
 
-#include "MonsterGenerator.h"
+#include "ObjectGenerator.h"
 
 class Preload
 {
@@ -10,12 +10,12 @@ public:
 	inline static void LoadAll()
 	{
 		ItemIconLoader::Initialize();
-		MonsterGenerator::Initialize();
+		ObjectGenerator::Initialize();
 	}
 
 	inline static void UnloadAll()
 	{
-		MonsterGenerator::Finalize();
+		ObjectGenerator::Finalize();
 		ItemIconLoader::Finalize();
 	}
 
