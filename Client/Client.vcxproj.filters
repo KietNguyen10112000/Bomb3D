@@ -56,6 +56,9 @@
     <Filter Include="Source Files\Game\ObjectGenerators\BuildingGenerators">
       <UniqueIdentifier>{b46e565d-e3a8-4ef9-bb1c-1e077346e42b}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Game\Bulding">
+      <UniqueIdentifier>{865db8ac-d8d7-4a9b-892c-26bff4c93fbc}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -104,6 +107,18 @@
       <Filter>Source Files\Game\ObjectGenerators\MonsterGenerators</Filter>
     </ClCompile>
     <ClCompile Include="Wall3x1Generator.cpp">
+      <Filter>Source Files\Game\ObjectGenerators\BuildingGenerators</Filter>
+    </ClCompile>
+    <ClCompile Include="BuildingUI.cpp">
+      <Filter>Source Files\Game\Bulding</Filter>
+    </ClCompile>
+    <ClCompile Include="VictoryTowerUI.cpp">
+      <Filter>Source Files\Game\Bulding</Filter>
+    </ClCompile>
+    <ClCompile Include="Wall3x1UI.cpp">
+      <Filter>Source Files\Game\Bulding</Filter>
+    </ClCompile>
+    <ClCompile Include="VictoryTowerGenerator.cpp">
       <Filter>Source Files\Game\ObjectGenerators\BuildingGenerators</Filter>
     </ClCompile>
   </ItemGroup>
@@ -227,6 +242,18 @@
     </ClInclude>
     <ClInclude Include="COLLISION_MASK.h">
       <Filter>Source Files</Filter>
+    </ClInclude>
+    <ClInclude Include="BuildingUI.h">
+      <Filter>Source Files\Game\Bulding</Filter>
+    </ClInclude>
+    <ClInclude Include="VictoryTowerUI.h">
+      <Filter>Source Files\Game\Bulding</Filter>
+    </ClInclude>
+    <ClInclude Include="Wall3x1UI.h">
+      <Filter>Source Files\Game\Bulding</Filter>
+    </ClInclude>
+    <ClInclude Include="VictoryTowerGenerator.h">
+      <Filter>Source Files\Game\ObjectGenerators\BuildingGenerators</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

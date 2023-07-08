@@ -1,0 +1,35 @@
+- Coin + EXP, exp chung, coin riêng
+- EXP sẽ dùng để xây victory tower, nâng cấp vũ khí, nâng cấp công trình
+- Coin sẽ dùng để mua đạn, mua vũ khí, xây công trình phòng thủ, tấn công
+
+- EXP cần để xây victory tower là 5000
+- Sau khi bắt đầu xây victory tower thì quái sẽ tự động tấn công team xây victory tower trước
+- Victory tower sẽ tốn 3 phút để xây xong, bên nào xây xong trước thì bên đó thắng
+
+- Công trình tấn công:
+	+ Trụ sinh quái: 1s sinh quái 1 lần, tối đa 100 con
+
+- Công trình phòng thủ:
+	+ Tường: 1000hp, chặn đạn đối phương nhưng cho phép đạn team mình bay qua
+
+- Trên map sẽ có các item (coin, vũ khí, đạn, skill)
+- Trên map sẽ có quái, tiêu diệt một con quái sẽ được 10 exp, tiêu diệt người chơi đối phương được 1000 exp, người chơi sau khi bị tiêu diệt sẽ sau 5-60s (mỗi lần bị chết thì sẽ tăng lên 5s) spawn ngẫu nhiên gần người còn lại của team mình, nếu cả team bị tiêu diệt cùng một lúc thì coi như thua.
+
+
+- Skill:
+	+ Tốc biến: dịch chuyển một đoạn ngắn
+	+ Thả bom: gây sát thương tại 1 vùng bất kì trên bản đồ
+	+ Heal: hồi hp
+	...
+	
+- Vũ khí:
+	+ Mặc định đầu game: SMG
+	+ AK, Gatling, Súng phóng lựu
+
+- Cơ chế điều khiển:
+	+ W,A,S,D để di chuyển
+	+ Chuột trái để dùng vũ khí
+	+ Chuột phải để dùng skill, hold chuột phải để aim skill
+	+ Hold Space để căn xây công trình, nhả ra để xây
+	+ 1,2,3,4,5 để chuyển skill
+	+ Q để đổi vũ khí (mỗi người chơi có max 2 vũ khí)

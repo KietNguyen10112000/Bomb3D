@@ -33,6 +33,8 @@
 #include "ObjectGeneratorId.h"
 #include "ObjectGenerator.h"
 
+#include "BuildingUI.h"
+
 using namespace soft;
 
 class PlayerScript : Traceable<PlayerScript>, public BaseDynamicObjectScript
@@ -110,7 +112,10 @@ public:
 	CircleCollider m_circleCollider = { Vec2(0,0), 3.0f * GameConfig::CELL_SIZE };
 
 	//SpriteRenderer* m_buildingUI = nullptr;
-	GameObject2D* m_buildingUI = nullptr;
+	GameObject2D* m_buildingUIObject = nullptr;
+
+	BuildingUI* m_buildingUI = nullptr;
+	ID m_curBuildingUiId = INVALID_ID;
 
 	inline void RecordInputAction()
 	{
@@ -233,14 +238,29 @@ public:
 	{
 		auto buildingUI = mheap::New<GameObject2D>(GameObject2D::DYNAMIC);
 		auto renderer = buildingUI->NewComponent<SpriteRenderer>("buildings/wall3x1.png", AARect(), Transform2D());
-		renderer->Sprite().FitTextureSize({ 3 * GameConfig::CELL_SIZE, GameConfig::CELL_SIZE });
 		renderer->ClearAABB();
 		renderer->SetVisible(false);
-		renderer->Sprite().SetAnchorPoint({ 0.5f,0.5f });
 
-		m_buildingUI = buildingUI;
+		m_buildingUIObject = buildingUI;
 		
 		GetObject()->AddChild(buildingUI);
+
+		SetBuilding(1);
+	}
+	
+	inline void SetBuilding(ID id)
+	{
+		m_buildingUI = BuildingUI::Get(id);
+		if (m_buildingUI)
+		{
+			m_curBuildingUiId = id;
+
+			m_buildingUI->PrepareUI(m_buildingUIObject);
+		}
+		else
+		{
+			m_curBuildingUiId = INVALID_ID;
+		}
 	}
 
 	virtual void OnStart() override
@@ -350,11 +370,12 @@ public:
 
 	inline void UpdatePathFinder()
 	{
-		if (m_lastPosUpdatePathFinder != Position() && (m_updatePathFinderCount++) % TICKS_TO_UPDATE_PATHFINDER == 0)
+		auto center = CenterPosition();
+		if (m_lastPosUpdatePathFinder != center && (m_updatePathFinderCount++) % TICKS_TO_UPDATE_PATHFINDER == 0)
 		{
 			auto& pathFinder = m_pathFinder;
-			pathFinder->Find(GetScene()->GetIterationCount(), pathFinder->GetCell(Position()));
-			m_lastPosUpdatePathFinder = Position();
+			pathFinder->Find(GetScene()->GetIterationCount(), pathFinder->GetCell(center));
+			m_lastPosUpdatePathFinder = center;
 		}
 	}
 
@@ -375,29 +396,49 @@ public:
 
 	inline void CheckBuildObjects(float dt)
 	{
+		if (!m_buildingUI)
+		{
+			return;
+		}
+
 		// show UI
 		if (m_input->IsKeyDown(KEYBOARD::SPACE))
 		{
 			if (Global::Get().GetMyPlayer() == this)
 			{
-				m_buildingUI->GetComponentRaw<Renderer2D>()->SetVisible(true);
+				m_buildingUIObject->GetComponentRaw<Renderer2D>()->SetVisible(true);
 			}
 
 			auto pos = Vec2(100, 0);
 			pos = (Vec3(pos, 1.0f) * Mat3::Rotation(m_input->m_synchRotation)).xy();
-			m_buildingUI->Transform().Translation() = pos + Vec2(25, 25);
-			m_buildingUI->Transform().Rotation() = m_input->m_synchRotation + PI / 2.0f;
+			m_buildingUIObject->Transform().Translation() = pos + Vec2(25, 25);
+
+			if (m_buildingUI->IsAllowRotation())
+			{
+				m_buildingUIObject->Transform().Rotation() = m_input->m_synchRotation + PI / 2.0f;
+			}
+			else
+			{
+				m_buildingUIObject->Transform().Rotation() = 0;
+			}
 		}
 
 		if (m_input->IsKeyUp(KEYBOARD::SPACE))
 		{
-			m_buildingUI->GetComponentRaw<Renderer2D>()->SetVisible(false);
+			m_buildingUIObject->GetComponentRaw<Renderer2D>()->SetVisible(false);
 
-			auto object = ObjectGenerator::NewObject(ObjectGeneratorId::WALL3x1);
-			object->Transform().Translation() = m_buildingUI->GlobalTransform().GetTranslation();
-			object->Transform().Rotation() = m_buildingUI->GlobalTransform().GetRotation();
+			auto object = ObjectGenerator::NewObject(m_buildingUI->GetBuildingObjectGeneratorId());
+			object->Transform().Translation() = m_buildingUIObject->GlobalTransform().GetTranslation();
+			object->Transform().Rotation() = m_buildingUIObject->GlobalTransform().GetRotation();
+
+			m_buildingUI->SetInfo(this, object);
 			GetScene()->AddObject(object);
 		}
+	}
+
+	virtual bool IsRemovable() override
+	{
+		return false;
 	}
 
 	virtual void OnUpdate(float dt) override

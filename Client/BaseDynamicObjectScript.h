@@ -27,6 +27,11 @@ protected:
 	virtual void OnTakeDamage(GameObject2D* from, float many) {};
 	virtual void OnDestroyed(GameObject2D* by) {};
 
+	virtual bool IsRemovable()
+	{
+		return true;
+	}
+
 public:
 	inline void TakeDamage(GameObject2D* from, float many)
 	{
@@ -37,7 +42,10 @@ public:
 		if (DynamicObjectProperties().hp == 0)
 		{
 			OnDestroyed(from);
-			GetScene()->RemoveObject(GetObject());
+			if (IsRemovable())
+			{
+				GetScene()->RemoveObject(GetObject());
+			}
 		}
 	}
 

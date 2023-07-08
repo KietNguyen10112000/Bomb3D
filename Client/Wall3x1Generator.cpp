@@ -8,6 +8,7 @@
 #include "GameConfig.h"
 
 #include "COLLISION_MASK.h"
+#include "TAG.h"
 
 Wall3x1Generator::Wall3x1Generator()
 {
@@ -20,10 +21,13 @@ Handle<GameObject2D> Wall3x1Generator::New()
 {
     auto wall = mheap::New<GameObject2D>(GameObject2D::DYNAMIC);
     wall->NewComponent<RigidBody2D>(RigidBody2D::STATIC, m_collider)->CollisionMask() = COLLISION_MASK::WALL;
+
     auto renderer = wall->NewComponent<SpriteRenderer>("buildings/wall3x1.png", AARect(), Transform2D());
     renderer->Sprite().FitTextureSize({ 3 * GameConfig::CELL_SIZE, GameConfig::CELL_SIZE });
     renderer->ClearAABB();
     renderer->Sprite().SetAnchorPoint({ 0.5f,0.5f });
+    
+    wall->Tag() = TAG::BUILDING_0;
 
     return wall;
 }

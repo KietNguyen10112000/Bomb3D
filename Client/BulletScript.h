@@ -88,6 +88,7 @@ public:
 
 		if (queryRet)
 		{
+			bool colliderMonster = false;
 			auto v = m_speed;
 			for (auto& obj : queryRet->objectResult)
 			{
@@ -102,10 +103,26 @@ public:
 					}
 
 					obj.object->GetComponentRaw<Monster>()->TakeDamage(m_from, m_damage);
+
+					colliderMonster = true;
 				}
 			}
 			
 			auto& obj = queryRet->objectResult[0];
+
+			if (colliderMonster)
+			{
+				m_scene->RemoveObject(GetObject());
+				return;
+			}
+
+			//if (obj.object->Tag() != TAG::BUILDING_0)
+			//{
+			//	//Global::Get().GetMyTeamId() == obj.object->GetComponentRaw
+
+			//	return;
+			//}
+
 			if (obj.object->Tag() != TAG::PLAYER)
 			{
 				m_scene->RemoveObject(GetObject());

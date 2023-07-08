@@ -145,6 +145,7 @@
     <ClCompile Include="..\GameActions\MatchStartAction.cpp" />
     <ClCompile Include="..\GameActions\UserInputAction.cpp" />
     <ClCompile Include="BindPython.cpp" />
+    <ClCompile Include="BuildingUI.cpp" />
     <ClCompile Include="Flash.cpp" />
     <ClCompile Include="GameInit.cpp" />
     <ClCompile Include="GameMap.cpp" />
@@ -156,7 +157,10 @@
     <ClCompile Include="SlimeGenerator.cpp" />
     <ClCompile Include="SMG.cpp" />
     <ClCompile Include="UIConsole.cpp" />
+    <ClCompile Include="VictoryTowerGenerator.cpp" />
+    <ClCompile Include="VictoryTowerUI.cpp" />
     <ClCompile Include="Wall3x1Generator.cpp" />
+    <ClCompile Include="Wall3x1UI.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\GameActions\GameActionConfig.h" />
@@ -167,6 +171,7 @@
     <ClInclude Include="..\Synch\Package.h" />
     <ClInclude Include="BaseDynamicObjectScript.h" />
     <ClInclude Include="BindPython.h" />
+    <ClInclude Include="BuildingUI.h" />
     <ClInclude Include="BulletScript.h" />
     <ClInclude Include="COLLISION_MASK.h" />
     <ClInclude Include="DebugRenderer.h" />
@@ -198,7 +203,10 @@
     <ClInclude Include="UIDebugPathFinder.h" />
     <ClInclude Include="UIScript.h" />
     <ClInclude Include="Gun.h" />
+    <ClInclude Include="VictoryTowerGenerator.h" />
+    <ClInclude Include="VictoryTowerUI.h" />
     <ClInclude Include="Wall3x1Generator.h" />
+    <ClInclude Include="Wall3x1UI.h" />
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="..\DebugView.natvis" />

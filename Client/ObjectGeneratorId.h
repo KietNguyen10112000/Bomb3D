@@ -7,7 +7,8 @@ public:
 	{
 		SLIME					= 1,
 		
-		WALL3x1					= 128,
+		VICTORY_TOWER			= 128,
+		WALL3x1					= 129,
 	};
 
 };
