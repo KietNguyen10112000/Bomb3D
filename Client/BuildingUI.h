@@ -1,5 +1,8 @@
 #pragma once
 
+#include "Core/Structures/String.h"
+#include "Math/Math.h"
+
 namespace soft
 {
 	class GameObject2D;
@@ -25,9 +28,13 @@ public:
 
 	virtual ~BuildingUI() {};
 
-	virtual void PrepareUI(GameObject2D* object) = 0;
+	virtual String GetUIImagePath() = 0;
+	virtual String GetUIName() = 0;
+
+	// return prepare distance
+	virtual float PrepareUI(GameObject2D* object, PlayerScript* player) = 0;
 	virtual bool IsAllowRotation() = 0;
-	virtual bool IsAllowOnNonMovable() = 0;
+	virtual bool CheckCanBuild(const Transform2D& transform, PlayerScript* player) = 0;
 	virtual size_t GetBuildingObjectGeneratorId() = 0;
 	virtual void SetInfo(PlayerScript* player, GameObject2D* building) = 0;
 

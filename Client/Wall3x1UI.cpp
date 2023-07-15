@@ -1,4 +1,4 @@
-#include "Wall3x1UI.h"
+﻿#include "Wall3x1UI.h"
 
 #include "Objects2D/GameObject2D.h"
 #include "Components2D/Rendering/SpriteRenderer.h"
@@ -9,7 +9,17 @@
 #include "Global.h"
 #include "PlayerScript.h"
 
-void Wall3x1UI::PrepareUI(soft::GameObject2D* object)
+String Wall3x1UI::GetUIImagePath()
+{
+	return "buildings/wall3x1_icon.png";
+}
+
+String Wall3x1UI::GetUIName()
+{
+	return u8"Tường 3x1";
+}
+
+float Wall3x1UI::PrepareUI(soft::GameObject2D* object, PlayerScript* player)
 {
 	auto renderer = object->GetComponentRaw<SpriteRenderer>();
 	renderer->Sprite().Initialize("buildings/wall3x1.png", AARect(), Transform2D());
@@ -17,6 +27,8 @@ void Wall3x1UI::PrepareUI(soft::GameObject2D* object)
 	renderer->ClearAABB();
 	renderer->SetVisible(false);
 	renderer->Sprite().SetAnchorPoint({ 0.5f,0.5f });
+
+	return 100.0f;
 }
 
 bool Wall3x1UI::IsAllowRotation()
@@ -37,7 +49,7 @@ void Wall3x1UI::SetInfo(PlayerScript* player, GameObject2D* building)
 	}
 }
 
-bool Wall3x1UI::IsAllowOnNonMovable()
+bool Wall3x1UI::CheckCanBuild(const Transform2D& transform, PlayerScript* player)
 {
 	return true;
 }

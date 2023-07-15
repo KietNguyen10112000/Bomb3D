@@ -45,6 +45,9 @@ protected:
 	Sprite m_playerSkillsIcon[5] = {};
 	String m_playerSkillsDesc[5] = {};
 
+	Sprite m_buildingIcon[256] = {};
+	bool m_showBuildingChoseUI = false;
+
 public:
 	UIScript()
 	{
@@ -53,6 +56,7 @@ public:
 		m_miniMap.setTexture(m_miniMapRT.getTexture());
 		m_miniMap.setPosition(10, 600 - MINIMAP_SIZE / 2 - 10);
 		RenderMiniMap();
+		PrepareBuildingChoseUI();
 	}
 
 	~UIScript()
@@ -61,6 +65,22 @@ public:
 	}
 
 private:
+	void PrepareBuildingChoseUI()
+	{
+		for (size_t i = 0; i < 256; i++)
+		{
+			auto ui = BuildingUI::Get(i);
+			if (ui)
+			{
+				auto path = ui->GetUIImagePath();
+				auto& sprite = m_buildingIcon[i];
+				sprite.Initialize(path, {}, {});
+				//sprite.FitTextureSize({ 150,150 }, true);
+				//sprite.PrepareRender();
+			}
+		}
+	}
+
 	void RenderMiniMap()
 	{
 		m_miniMapRT.clear({ 0,0,0,100 });
@@ -85,6 +105,49 @@ private:
 				}
 			}
 		}
+	}
+
+	void RenderBuildingChoseUI()
+	{
+		if (!m_showBuildingChoseUI)
+		{
+			return;
+		}
+
+		bool open = true;
+		ImGui::SetNextWindowPos(ImVec2(0, 0));
+		//ImGui::SetNextWindowBgAlpha(0.35f);
+		ImGui::SetNextWindowSize(ImVec2(700, 500));
+		ImGui::Begin("Chose building", &open, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
+
+		constexpr size_t NUM_COLUMNS = 4;
+
+		size_t count = 0;
+		for (size_t i = 0; i < 256; i++)
+		{
+			auto& icon = m_buildingIcon[i];
+			auto ui = BuildingUI::Get(i);
+			if (ui)
+			{
+				auto row = count / NUM_COLUMNS;
+				auto col = count % NUM_COLUMNS;
+
+				
+				if (ImGui::ImageButton(icon.SFSprite(), sf::Vector2f(150,150)))
+				{
+					Global::Get().GetMyPlayer()->SetBuildingSynch(i);
+				}
+
+				if (col != NUM_COLUMNS - 1)
+				{
+					ImGui::SameLine();
+				}
+
+				count++;
+			}
+		}
+
+		ImGui::End();
 	}
 
 	void RenderConsole()
@@ -168,12 +231,18 @@ public:
 			m_showedDebugUI = !m_showedDebugUI;
 		}
 
-		if (Global::Get().setting.isOnRClickToSpawnMonster && Input()->IsKeyUp('P'))
+		/*if (Global::Get().setting.isOnRClickToSpawnMonster && Input()->IsKeyUp('P'))
 		{
 			auto& cursorPos = Input()->GetCursor().position;
 			auto center = Global::Get().cam->GetWorldPosition(Vec2(cursorPos.x, cursorPos.y),
 				Input()->GetWindowWidth(), Input()->GetWindowHeight());
 			SpawnMonster(center);
+		}*/
+
+		if (Input()->IsKeyUp('B'))
+		{
+			m_showBuildingChoseUI = !m_showBuildingChoseUI;
+			Global::Get().setting.isStopPlayerLeftMouse = !Global::Get().setting.isStopPlayerLeftMouse;
 		}
 	}
 
@@ -268,6 +337,7 @@ public:
 
 		RenderConsole();
 		//UIDebugPathFinder::Render(m_scene->GetRenderingSystem());
+		RenderBuildingChoseUI();
 	}
 	
 };

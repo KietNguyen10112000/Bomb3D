@@ -45,6 +45,8 @@ public:
 		{
 			m_renderer->SetAnimation(IDLE_ANIMATION_ID);
 			m_curAnimId = IDLE_ANIMATION_ID;
+
+			m_renderer->Play(Random::RangeInt32(0, 8) * (1.0f / 8.0f));
 		}
 	};
 

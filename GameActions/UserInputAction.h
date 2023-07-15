@@ -10,10 +10,14 @@ struct UserInput
 	bool	m_curKey[256] = {};
 	float	m_curRotation = 0;
 
+	size_t m_chooseBuildingId = INVALID_ID;
+
+	// synch
 	bool	m_prevSynchKey[256] = {};
 
 	bool	m_synchKey[256] = {};
 	float	m_synchRotation = 0;
+	size_t m_synchChooseBuildingId = INVALID_ID;
 
 	inline void Roll()
 	{
@@ -55,6 +59,11 @@ struct UserInput
 	{
 		return m_synchKey[keyCode] == false && m_prevSynchKey[keyCode] == true;
 	}
+
+	inline void SetBuldingId(ID id)
+	{
+		m_chooseBuildingId = id;
+	}
 };
 
 class UserInputAction : public Action
@@ -67,6 +76,7 @@ public:
 	byte m_changedKey[256] = {};
 	byte m_changedKeyCount = 0;
 	float m_synchRotation = 0;
+	size_t m_synchChooseBuildingId = INVALID_ID;
 
 	UserInputAction();
 

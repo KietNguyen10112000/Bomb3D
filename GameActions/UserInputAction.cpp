@@ -30,6 +30,7 @@ void UserInputAction::Serialize(ByteStream& stream)
 
 		stream.Set(pNumChangedKey, (byte)numChanged);
 		stream.Put<float>(m_input->m_curRotation);
+		stream.Put<size_t>(m_input->m_chooseBuildingId);
 		return;
 	}
 
@@ -44,6 +45,7 @@ void UserInputAction::Serialize(ByteStream& stream)
 	}
 
 	stream.Put<float>(m_synchRotation);
+	stream.Put<size_t>(m_synchChooseBuildingId);
 }
 
 void UserInputAction::Deserialize(ByteStreamRead& stream)
@@ -58,6 +60,7 @@ void UserInputAction::Deserialize(ByteStreamRead& stream)
 	}
 
 	m_synchRotation = stream.Get<float>();
+	m_synchChooseBuildingId = stream.Get<size_t>();
 }
 
 void UserInputAction::Activate(Scene2D* scene)
@@ -70,5 +73,7 @@ void UserInputAction::Activate(Scene2D* scene)
 		auto keyCode = m_changedKey[i];
 		input->m_synchKey[keyCode] = !input->m_synchKey[keyCode];
 	}
+
+	input->m_synchChooseBuildingId = m_synchChooseBuildingId;
 #endif
 }

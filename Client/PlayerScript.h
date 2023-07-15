@@ -116,6 +116,7 @@ public:
 
 	BuildingUI* m_buildingUI = nullptr;
 	ID m_curBuildingUiId = INVALID_ID;
+	float m_curBuildingPrepareDist = 100.0f;
 
 	inline void RecordInputAction()
 	{
@@ -134,7 +135,16 @@ public:
 		m_input->SetKey('S', Input()->IsKeyDown('S'));
 		m_input->SetKey('A', Input()->IsKeyDown('A'));
 		m_input->SetKey('D', Input()->IsKeyDown('D'));
-		m_input->SetKey(KEYBOARD::MOUSE_LEFT, Input()->IsKeyDown(KEYBOARD::MOUSE_LEFT));
+
+		if (!Global::Get().setting.isStopPlayerLeftMouse)
+		{
+			m_input->SetKey(KEYBOARD::MOUSE_LEFT, Input()->IsKeyDown(KEYBOARD::MOUSE_LEFT));
+		}
+		else
+		{
+			m_input->SetKey(KEYBOARD::MOUSE_LEFT, false);
+		}
+
 		m_input->SetKey(KEYBOARD::MOUSE_RIGHT, Input()->IsKeyDown(KEYBOARD::MOUSE_RIGHT));
 		m_input->SetKey(KEYBOARD::SPACE, Input()->IsKeyDown(KEYBOARD::SPACE));
 
@@ -245,7 +255,7 @@ public:
 		
 		GetObject()->AddChild(buildingUI);
 
-		SetBuilding(1);
+		SetBuildingSynch(1);
 	}
 	
 	inline void SetBuilding(ID id)
@@ -255,7 +265,7 @@ public:
 		{
 			m_curBuildingUiId = id;
 
-			m_buildingUI->PrepareUI(m_buildingUIObject);
+			m_curBuildingPrepareDist = m_buildingUI->PrepareUI(m_buildingUIObject, this);
 		}
 		else
 		{
@@ -263,17 +273,22 @@ public:
 		}
 	}
 
+	inline void SetBuildingSynch(ID id)
+	{
+		m_input->m_chooseBuildingId = id;
+	}
+
 	virtual void OnStart() override
 	{
+		m_input = &Global::Get().gameLoop->m_userInput[m_userId];
+		m_inputAction.SetUserId(m_userId, m_input);
+
 		InitTestSkill();
 		InitTestGun();
 		InitBuildingUI();
 
 		m_gun = m_guns[m_curGunId]->GetGunObject(this);
 		GetObject()->AddChild(m_gun);
-
-		m_input = &Global::Get().gameLoop->m_userInput[m_userId];
-		m_inputAction.SetUserId(m_userId, m_input);
 
 		m_renderer = GetObject()->GetComponent<SpritesRenderer>();
 
@@ -409,7 +424,7 @@ public:
 				m_buildingUIObject->GetComponentRaw<Renderer2D>()->SetVisible(true);
 			}
 
-			auto pos = Vec2(100, 0);
+			auto pos = Vec2(m_curBuildingPrepareDist, 0);
 			pos = (Vec3(pos, 1.0f) * Mat3::Rotation(m_input->m_synchRotation)).xy();
 			m_buildingUIObject->Transform().Translation() = pos + Vec2(25, 25);
 
@@ -427,12 +442,15 @@ public:
 		{
 			m_buildingUIObject->GetComponentRaw<Renderer2D>()->SetVisible(false);
 
-			auto object = ObjectGenerator::NewObject(m_buildingUI->GetBuildingObjectGeneratorId());
-			object->Transform().Translation() = m_buildingUIObject->GlobalTransform().GetTranslation();
-			object->Transform().Rotation() = m_buildingUIObject->GlobalTransform().GetRotation();
+			if (m_buildingUI->CheckCanBuild(m_buildingUIObject->GlobalTransform(), this))
+			{
+				auto object = ObjectGenerator::NewObject(m_buildingUI->GetBuildingObjectGeneratorId());
+				object->Transform().Translation() = m_buildingUIObject->GlobalTransform().GetTranslation();
+				object->Transform().Rotation() = m_buildingUIObject->GlobalTransform().GetRotation();
 
-			m_buildingUI->SetInfo(this, object);
-			GetScene()->AddObject(object);
+				m_buildingUI->SetInfo(this, object);
+				GetScene()->AddObject(object);
+			}
 		}
 	}
 
@@ -484,6 +502,11 @@ public:
 			m_redLine->Scale().x = m_redLineLen;
 
 			m_crossHair->Position() = m_crossHairPos;
+		}
+
+		if (m_input->m_synchChooseBuildingId != m_curBuildingUiId && m_input->m_synchChooseBuildingId != INVALID_ID)
+		{
+			SetBuilding(m_input->m_synchChooseBuildingId);
 		}
 
 		CheckBuildObjects(dt);

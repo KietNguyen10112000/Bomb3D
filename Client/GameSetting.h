@@ -17,4 +17,5 @@ struct GameSetting
 	size_t					pathFinderUpdateStep			= 500;
 
 	bool					isShowChooseBuildingUI			= false;
+	bool					isStopPlayerLeftMouse			= false;
 };

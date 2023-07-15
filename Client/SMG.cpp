@@ -6,7 +6,7 @@
 Handle<GameObject2D> SMG::GetGunObject(PlayerScript* player)
 {
 	auto gunObj = mheap::New<GameObject2D>(GameObject2D::DYNAMIC);
-	auto gunRdr = gunObj->NewComponent<SpriteRenderer>("smg2.png");
+	auto gunRdr = gunObj->NewComponent<SpriteRenderer>("guns/smg2.png");
 	gunRdr->Sprite().SetAnchorPoint(Vec2(100 / 331.0f, 40 / 120.0f));
 	gunRdr->Sprite().Transform().Scale() = Vec2(0.3f);
 	gunRdr->ClearAABB();
