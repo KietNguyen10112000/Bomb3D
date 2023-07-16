@@ -12,6 +12,8 @@
 
 #include "GameUtils.h"
 
+#include "GameFont.h"
+
 using namespace soft;
 
 //#include <pybind11/embed.h>
@@ -175,7 +177,7 @@ private:
 		Global::Get().setting.playerControlMode = GameSetting::PlayerControlMode::NONE;
 	}
 
-	void SpawnMonster(const Vec2& pos)
+	/*void SpawnMonster(const Vec2& pos)
 	{
 		if (!Global::Get().gameMap.IsMovable(pos))
 		{
@@ -207,7 +209,7 @@ private:
 			->Position() = { -35, -40 };
 
 		m_scene->AddObject(monster);
-	}
+	}*/
 
 public:
 	virtual void OnStart() override
@@ -260,6 +262,12 @@ public:
 		//ImGui::SetNextItemWidth(50);
 		ImGui::PushStyleColor(0, { 1,1,0,1 });
 		ImGui::TextWrapped("%d coin", playerData.coin);
+		ImGui::PopStyleColor();
+
+		ImGui::SameLine();
+
+		ImGui::PushStyleColor(0, { 0,0,1,1 });
+		ImGui::TextWrapped("%d exp", player->GetTeam().exp);
 		ImGui::PopStyleColor();
 
 		ImGui::End();
@@ -320,6 +328,130 @@ public:
 		ImGui::End();
 	}
 
+	inline void ShowGameOver()
+	{
+		bool open = true;
+		ImGui::SetNextWindowPos(ImVec2(0, 0));
+		//ImGui::SetNextWindowBgAlpha(0.35f);
+		auto& io = ImGui::GetIO();
+		ImGui::SetNextWindowSize(io.DisplaySize);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		ImGui::Begin("GameOver", &open, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
+		//ImGui::SetWindowFontScale(5.0f);
+
+		char* text = nullptr;
+		if (Global::Get().GetMyTeam().isVictory)
+		{
+			text = (char*)u8"Thắng";
+		}
+		else
+		{
+			text = (char*)u8"Thua";
+		}
+
+		auto winSize = ImGui::GetWindowSize();
+
+		ImGui::PushFont(GameFont::s_font100);
+		auto textSize= ImGui::CalcTextSize(text);
+		ImGui::SetCursorPos(ImVec2((winSize.x - textSize.x) * 0.5f, (winSize.y - textSize.y) * 0.5f - 80));
+		ImGui::Text(text);
+		ImGui::PopFont();
+
+		text = (char*)u8"Hãy thoát game vào lại để bắt đầu trận đấu mới!";
+		ImGui::PushFont(GameFont::s_font50);
+		textSize = ImGui::CalcTextSize(text);
+		ImGui::SetCursorPos(ImVec2((winSize.x - textSize.x) * 0.5f, (winSize.y - textSize.y) * 0.5f));
+		ImGui::Text(text);
+		ImGui::PopFont();
+	
+		ImGui::End();
+		ImGui::PopStyleVar();
+	}
+
+	inline void ShowRespawnCountDown()
+	{
+		bool open = true;
+		ImGui::SetNextWindowPos(ImVec2(0, 0));
+		//ImGui::SetNextWindowBgAlpha(0.35f);
+		auto& io = ImGui::GetIO();
+		ImGui::SetNextWindowSize(io.DisplaySize);
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		ImGui::Begin("Die", &open, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
+		//ImGui::SetWindowFontScale(5.0f);
+
+		char countdownStr[32] = {};
+		snprintf(countdownStr, 32, u8"Còn %d giây", (size_t)Global::Get().GetMyPlayer()->m_respawnTimer.Remain());
+		char* text = countdownStr;
+
+		auto winSize = ImGui::GetWindowSize();
+
+		ImGui::PushFont(GameFont::s_font100);
+		auto textSize = ImGui::CalcTextSize(text);
+		ImGui::SetCursorPos(ImVec2((winSize.x - textSize.x) * 0.5f, (winSize.y - textSize.y) * 0.5f - 80));
+		ImGui::Text(text);
+		ImGui::PopFont();
+
+		text = (char*)u8"Bạn đã chết, hãy đợi để hồi sinh!";
+		ImGui::PushFont(GameFont::s_font50);
+		textSize = ImGui::CalcTextSize(text);
+		ImGui::SetCursorPos(ImVec2((winSize.x - textSize.x) * 0.5f, (winSize.y - textSize.y) * 0.5f));
+		ImGui::Text(text);
+		ImGui::PopFont();
+
+		ImGui::End();
+		ImGui::PopStyleVar();
+	}
+
+	inline void ShowRemainVictoryTime()
+	{
+		auto& myTeam = Global::Get().GetMyTeam();
+		auto& oppositeTeam = Global::Get().GetOppositeTeam();
+
+		if (!myTeam.hasVictoryTower && !oppositeTeam.hasVictoryTower)
+		{
+			return;
+		}
+
+		constexpr float WIDTH = 150.0f;
+		auto& io = ImGui::GetIO();
+		bool open = true;
+		ImGui::SetNextWindowPos(ImVec2(io.DisplaySize.x / 2.0f - WIDTH / 2.0f, -5));
+		ImGui::SetNextWindowBgAlpha(0.35f);
+		ImGui::SetNextWindowSize(ImVec2(WIDTH, 70));
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+		ImGui::Begin("RemainVictoryTime", &open, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
+
+		//auto winSize = ImGui::GetWindowSize();
+
+		char countdownStr[32] = {};
+		char* text = countdownStr;
+
+		if (myTeam.hasVictoryTower)
+		{
+			snprintf(countdownStr, 32, u8"%d giây sẽ thắng", (size_t)myTeam.remainVictoryTime);
+			//auto textSize = ImGui::CalcTextSize(text);
+
+			ImGui::PushStyleColor(0, { 0,1,0,1 });
+			//ImGui::SetCursorPos(ImVec2((winSize.x - textSize.x) * 0.5f, (winSize.y - textSize.y) * 0.5f));
+			ImGui::Text(text);
+			ImGui::PopStyleColor();
+		}
+
+		if (oppositeTeam.hasVictoryTower)
+		{
+			snprintf(countdownStr, 32, u8"%d giây sẽ thua", (size_t)oppositeTeam.remainVictoryTime);
+			//auto textSize = ImGui::CalcTextSize(text);
+
+			ImGui::PushStyleColor(0, { 1,0,0,1 });
+			//ImGui::SetCursorPos(ImVec2((winSize.x - textSize.x) * 0.5f, (winSize.y - textSize.y) * 0.5f));
+			ImGui::Text(text);
+			ImGui::PopStyleColor();
+		}
+
+		ImGui::End();
+		ImGui::PopStyleVar();
+	}
+
 	virtual void OnGUI() override
 	{
 		auto& window = Graphics2D::Get()->m_window;
@@ -338,6 +470,26 @@ public:
 		RenderConsole();
 		//UIDebugPathFinder::Render(m_scene->GetRenderingSystem());
 		RenderBuildingChoseUI();
+
+		if (Global::Get().isGameOver)
+		{
+			ShowGameOver();
+		}
+		else if (Global::Get().GetMyPlayer()->DynamicObjectProperties().hp <= 0.0f)
+		{
+			ShowRespawnCountDown();
+		}
+
+		if (!Global::Get().isGameOver)
+		{
+			ShowRemainVictoryTime();
+		}
+	}
+
+public:
+	inline void ShowToast(String msg, float howLong, bool now = false)
+	{
+
 	}
 	
 };

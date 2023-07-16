@@ -35,6 +35,11 @@ protected:
 public:
 	inline void TakeDamage(GameObject2D* from, float many)
 	{
+		if (DynamicObjectProperties().hp == 0.0f)
+		{
+			return;
+		}
+
 		many = std::clamp(many, 0.0f, DynamicObjectProperties().hp);
 		DynamicObjectProperties().hp -= many;
 		OnTakeDamage(from, many);

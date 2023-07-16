@@ -33,4 +33,9 @@ public:
 		return m_remain == 0.0f;
 	}
 
+	inline float Remain() const
+	{
+		return m_remain;
+	}
+
 };

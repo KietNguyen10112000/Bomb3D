@@ -59,6 +59,12 @@
     <Filter Include="Source Files\Game\Bulding">
       <UniqueIdentifier>{865db8ac-d8d7-4a9b-892c-26bff4c93fbc}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Source Files\Game\Team">
+      <UniqueIdentifier>{c4f99089-c962-4ccd-a7a5-138217a2513d}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Files\Scripts\BuildingScript">
+      <UniqueIdentifier>{ec7dcd69-971d-4ef8-ae40-0bdc5cdb063e}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -120,6 +126,9 @@
     </ClCompile>
     <ClCompile Include="VictoryTowerGenerator.cpp">
       <Filter>Source Files\Game\ObjectGenerators\BuildingGenerators</Filter>
+    </ClCompile>
+    <ClCompile Include="Monster.cpp">
+      <Filter>Source Files\Scripts\Monsters</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -254,6 +263,15 @@
     </ClInclude>
     <ClInclude Include="VictoryTowerGenerator.h">
       <Filter>Source Files\Game\ObjectGenerators\BuildingGenerators</Filter>
+    </ClInclude>
+    <ClInclude Include="TeamInfo.h">
+      <Filter>Source Files\Game\Team</Filter>
+    </ClInclude>
+    <ClInclude Include="VictoryTowerScript.h">
+      <Filter>Source Files\Scripts\BuildingScript</Filter>
+    </ClInclude>
+    <ClInclude Include="GameFont.h">
+      <Filter>Source Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

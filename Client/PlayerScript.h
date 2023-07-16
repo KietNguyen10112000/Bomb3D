@@ -34,8 +34,11 @@
 #include "ObjectGenerator.h"
 
 #include "BuildingUI.h"
+#include "Stopwatch.h"
 
 using namespace soft;
+
+class VictoryTowerScript;
 
 class PlayerScript : Traceable<PlayerScript>, public BaseDynamicObjectScript
 {
@@ -62,6 +65,7 @@ protected:
 		tracer->Trace(m_skillsUI);
 		tracer->Trace(m_skillsUIObject);
 		tracer->Trace(m_guns);
+		//tracer->Trace(m_victoryTowerScript);
 	}
 
 	Handle<SpritesRenderer>			m_renderer;
@@ -69,6 +73,8 @@ protected:
 	Handle<GameObject2D>			m_gun;
 	Handle<GameObject2D>			m_redLine;
 	Handle<GameObject2D>			m_crossHair;
+
+	//Handle<VictoryTowerScript>		m_victoryTowerScript = nullptr;
 
 	//SharedPtr<RectCollider>			m_bulletCollider;
 
@@ -117,6 +123,9 @@ public:
 	BuildingUI* m_buildingUI = nullptr;
 	ID m_curBuildingUiId = INVALID_ID;
 	float m_curBuildingPrepareDist = 100.0f;
+
+	float m_nextRespawnTime = 0;
+	Stopwatch m_respawnTimer = {};
 
 	inline void RecordInputAction()
 	{
@@ -205,6 +214,18 @@ public:
 		m_gunRotationLerpTime = std::max(m_gunRotationLerpTime - dt, 0.0f);*/
 	}
 
+	inline void CheckGameOver()
+	{
+		if (GetTeam().aliveCount == 0)
+		{
+			Global::Get().isGameOver = true;
+			GetTeam().isVictory = false;
+
+			auto& oppositeTeam = GetTeamId() == 1 ? Global::Get().teamsInfo[0] : Global::Get().teamsInfo[1];
+			oppositeTeam.isVictory = true;
+		}
+	}
+
 	inline void SetUserId(ID id)
 	{
 		m_userId = id;
@@ -280,6 +301,8 @@ public:
 
 	virtual void OnStart() override
 	{
+		GetTeam().aliveCount++;
+
 		m_input = &Global::Get().gameLoop->m_userInput[m_userId];
 		m_inputAction.SetUserId(m_userId, m_input);
 
@@ -454,6 +477,58 @@ public:
 		}
 	}
 
+	inline void Respawn()
+	{
+		if (GetTeam().aliveCount == 0)
+		{
+			return;
+		}
+
+		DynamicObjectProperties().hp = 100.0f;
+		GetTeam().aliveCount++;
+
+		auto idx = Global::Get().Random().RangeInt32(0, Global::Get().activePlayerCount);
+		auto count = Global::Get().activePlayerCount;
+		PlayerScript* found = nullptr;
+		for (size_t i = 0; i < count; i++)
+		{
+			auto player = Global::Get().players[(i + idx) % count];
+			if (player->GetTeamId() == GetTeamId() && player != this && player->DynamicObjectProperties().hp > 0)
+			{
+				found = player;
+				break;
+			}
+		}
+		
+		if (found)
+		{
+			constexpr size_t OFFSET_X[8] = { 1,  1,	  1,   0,   0,  -1,	 -1,  -1 };
+			constexpr size_t OFFSET_Y[8] = { 0,  1,	 -1,  -1,   1,	0,	  1,  -1 };
+			auto center = found->CenterPosition();
+			auto& map = Global::Get().gameMap;
+			for (size_t i = 0; i < 8; i++)
+			{
+				auto pos = center + Vec2(OFFSET_X[i], OFFSET_Y[i]) * (float)GameConfig::CELL_SIZE;
+				if (map.IsMovable(pos))
+				{
+					Position() = pos;
+					return;
+				}
+			}
+
+			Position() = center;
+		}
+	}
+
+	virtual void OnDestroyed(GameObject2D* by) override
+	{
+		GetTeam().aliveCount--;
+
+		//std::cout << Global::Get().GetMyTeam().aliveCount << "\n";
+
+		m_respawnTimer.Start(m_nextRespawnTime += 5, true);
+	}
+
 	virtual bool IsRemovable() override
 	{
 		return false;
@@ -466,6 +541,22 @@ public:
 			RecordInputAction();
 		else
 			HidePlayerUI();
+
+		if (DynamicObjectProperties().hp <= 0)
+		{
+			m_respawnTimer.Update(dt);
+			if (m_respawnTimer.IsTimeout() && !Global::Get().isGameOver)
+			{
+				Respawn();
+			}
+		}
+
+		CheckGameOver();
+		if (DynamicObjectProperties().hp <= 0 || Global::Get().isGameOver)
+		{
+			Position() = Vec2{ Global::Get().gameMap.m_width + 1, Global::Get().gameMap.m_height + 1 } * (float)GameConfig::CELL_SIZE;
+			return;
+		}
 
 		auto skillFlag = 0;
 		auto& curSkill = GetCurSkill();
@@ -629,4 +720,14 @@ public:
 	{
 		return m_userId % 2;
 	}
+
+	inline TeamInfo& GetTeam()
+	{
+		return Global::Get().teamsInfo[GetTeamId()];
+	}
+
+	/*inline void SetVictoryTower(const Handle<VictoryTowerScript>& tower)
+	{
+		m_victoryTowerScript = tower;
+	}*/
 };

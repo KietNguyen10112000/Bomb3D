@@ -32,9 +32,12 @@ protected:
 
 	float m_speed = 200.0f;
 
+	float m_destroyExp = 100;
+
 public:
 	virtual void OnIdle() {};
 	virtual void OnMove(const Vec2& dir) {};
+	virtual void OnMonsterDestroyed(GameObject2D* by) {};
 
 public:
 	//virtual void OnStart() override
@@ -42,6 +45,8 @@ public:
 	//	//m_renderer = GetObject()->GetComponent<SpritesRenderer>().Get();
 	//	//m_body = GetObject()->GetComponent<RigidBody2D>().Get();
 	//}
+
+	virtual void OnDestroyed(GameObject2D* by) override final;
 
 	virtual void OnUpdate(float dt) override
 	{

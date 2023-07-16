@@ -8,6 +8,7 @@
 
 #include "Global.h"
 #include "PlayerScript.h"
+#include "VictoryTowerScript.h"
 
 String VictoryTowerUI::GetUIImagePath()
 {
@@ -43,6 +44,13 @@ size_t VictoryTowerUI::GetBuildingObjectGeneratorId()
 
 void VictoryTowerUI::SetInfo(PlayerScript* player, soft::GameObject2D* building)
 {
+	auto script = building->GetComponentRaw<VictoryTowerScript>();
+	script->m_team = &player->GetTeam();
+	script->m_remainTime = 10;
+
+	player->GetTeam().hasVictoryTower = true;
+	//player->SetVictoryTower(script);
+
 	if (player->GetTeamId() == Global::Get().GetMyTeamId())
 	{
 		return;
@@ -58,5 +66,10 @@ void VictoryTowerUI::SetInfo(PlayerScript* player, soft::GameObject2D* building)
 
 bool VictoryTowerUI::CheckCanBuild(const Transform2D& transform, PlayerScript* player)
 {
+	if (player->GetTeam().hasVictoryTower)
+	{
+		return false;
+	}
+
 	return Global::Get().gameMap.IsMovable(transform.GetTranslation());
 }

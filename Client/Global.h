@@ -9,6 +9,8 @@
 #include "GameMap.h"
 #include "Core/Random/ProcRandom.h"
 
+#include "TeamInfo.h"
+
 using namespace soft;
 
 class GameLoopHandler;
@@ -48,6 +50,9 @@ struct Global
 
 	ProcRandom procRandom = {};
 
+	TeamInfo teamsInfo[2] = {};
+	bool isGameOver = false;
+
 	inline auto GetMyPlayer()
 	{
 		return players[userId];
@@ -56,6 +61,16 @@ struct Global
 	inline auto GetMyTeamId()
 	{
 		return userId % 2;
+	}
+
+	inline auto& GetMyTeam()
+	{
+		return teamsInfo[GetMyTeamId()];
+	}
+
+	inline auto& GetOppositeTeam()
+	{
+		return teamsInfo[(GetMyTeamId() + 1) % 2];
 	}
 
 	inline void ExecuteAction(Action* action)

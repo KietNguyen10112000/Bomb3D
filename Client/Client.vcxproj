@@ -153,6 +153,7 @@
     <ClCompile Include="Item.cpp" />
     <ClCompile Include="ItemIconLoader.cpp" />
     <ClCompile Include="main.cpp" />
+    <ClCompile Include="Monster.cpp" />
     <ClCompile Include="ObjectGenerator.cpp" />
     <ClCompile Include="SlimeGenerator.cpp" />
     <ClCompile Include="SMG.cpp" />
@@ -177,6 +178,7 @@
     <ClInclude Include="DebugRenderer.h" />
     <ClInclude Include="Flash.h" />
     <ClInclude Include="GameConfig.h" />
+    <ClInclude Include="GameFont.h" />
     <ClInclude Include="GameInit.h" />
     <ClInclude Include="GameMap.h" />
     <ClInclude Include="GameSetting.h" />
@@ -199,11 +201,13 @@
     <ClInclude Include="SMG.h" />
     <ClInclude Include="Stopwatch.h" />
     <ClInclude Include="TAG.h" />
+    <ClInclude Include="TeamInfo.h" />
     <ClInclude Include="UIConsole.h" />
     <ClInclude Include="UIDebugPathFinder.h" />
     <ClInclude Include="UIScript.h" />
     <ClInclude Include="Gun.h" />
     <ClInclude Include="VictoryTowerGenerator.h" />
+    <ClInclude Include="VictoryTowerScript.h" />
     <ClInclude Include="VictoryTowerUI.h" />
     <ClInclude Include="Wall3x1Generator.h" />
     <ClInclude Include="Wall3x1UI.h" />
