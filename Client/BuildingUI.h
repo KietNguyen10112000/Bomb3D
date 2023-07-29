@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "Core/Structures/String.h"
 #include "Math/Math.h"
@@ -30,6 +30,10 @@ public:
 
 	virtual String GetUIImagePath() = 0;
 	virtual String GetUIName() = 0;
+	virtual String GetDesc() 
+	{
+		return u8"Chưa có mô tả cho công trình này";
+	};
 
 	// return prepare distance
 	virtual float PrepareUI(GameObject2D* object, PlayerScript* player) = 0;

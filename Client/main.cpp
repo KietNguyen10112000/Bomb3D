@@ -24,10 +24,33 @@ void Initialize(Engine* engine)
 
 	Preload::LoadAll();
 
+	char host[32] = "127.0.0.1";
+
 	TCP_SOCKET_DESCRIPTION desc;
-	desc.host = "127.0.0.1";
+	desc.host = host;
 	desc.port = 9023;
 	desc.useNonBlocking = true;
+
+	if (FileUtils::IsExist("Resources/Config/Server.txt"))
+	{
+		byte* buffer;
+		size_t size;
+		FileUtils::ReadFile("Resources/Config/Server.txt", buffer, size);
+		std::string_view str = { (char*)buffer, size };
+
+		auto begin = str.find('=');
+		if (begin != std::string_view::npos)
+		{
+			auto endIter = std::find_if(str.begin() + begin, str.end(), [](int c) { return std::isspace(c) || c == '\r' || c == '\t' || c == '\n'; });
+			auto dis = std::distance(str.begin() + begin, endIter) - 1;
+			std::string_view hostStr = str.substr(begin + 1, dis);
+
+			::memcpy(host, hostStr.data(), hostStr.length());
+		}
+
+		FileUtils::FreeBuffer(buffer);
+	}
+
 	Global::Get().connector = new TCPConnector(desc);
 	if (Global::Get().connector->Connect() < 0)
 	{

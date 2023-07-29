@@ -50,6 +50,13 @@ protected:
 	Sprite m_buildingIcon[256] = {};
 	bool m_showBuildingChoseUI = false;
 
+	BuildingUI* m_curBuildingUI = nullptr;
+	String m_curBuildingUIName;
+	String m_curBuildingUIDesc;
+	ID m_curBuildingUIId = INVALID_ID;
+
+	Sprite m_graySprite;
+
 public:
 	UIScript()
 	{
@@ -69,6 +76,8 @@ public:
 private:
 	void PrepareBuildingChoseUI()
 	{
+		m_graySprite.Initialize("1.png", {}, {});
+
 		for (size_t i = 0; i < 256; i++)
 		{
 			auto ui = BuildingUI::Get(i);
@@ -116,11 +125,41 @@ private:
 			return;
 		}
 
+		if (m_curBuildingUI != Global::Get().GetMyPlayer()->m_buildingUI)
+		{
+			m_curBuildingUI = Global::Get().GetMyPlayer()->m_buildingUI;
+			m_curBuildingUIId = Global::Get().GetMyPlayer()->m_curBuildingUiId;
+			m_curBuildingUIDesc = m_curBuildingUI->GetDesc();
+			m_curBuildingUIName = m_curBuildingUI->GetUIName();
+		}
+
 		bool open = true;
 		ImGui::SetNextWindowPos(ImVec2(0, 0));
 		//ImGui::SetNextWindowBgAlpha(0.35f);
 		ImGui::SetNextWindowSize(ImVec2(700, 500));
 		ImGui::Begin("Chose building", &open, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize);
+
+		if (m_curBuildingUI)
+		{
+			auto& icon = m_buildingIcon[m_curBuildingUIId];
+			ImGui::Image(icon.SFSprite(), sf::Vector2f(150, 150));
+
+			ImGui::SameLine();
+
+			ImGui::BeginChild(1, ImVec2(500, 150));
+			ImGui::Text(m_curBuildingUIName.c_str());
+			ImGui::TextWrapped(m_curBuildingUIDesc.c_str());
+			ImGui::EndChild();
+		}
+		else
+		{
+			ImGui::Image(m_graySprite.SFSprite(), sf::Vector2f(150, 150));
+		}
+
+		ImGui::Spacing();
+		ImGui::Separator();
+		ImGui::Spacing();
+		ImGui::Spacing();
 
 		constexpr size_t NUM_COLUMNS = 4;
 

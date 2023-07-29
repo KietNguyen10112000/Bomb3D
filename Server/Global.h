@@ -1,6 +1,7 @@
 #pragma once
 
 #include "GameRoom.h"
+#include "ServerConfig.h"
 
 #ifdef SERVER_REPL
 #include "Core/Structures/Raw/ConcurrentQueue.h"
@@ -20,9 +21,9 @@ struct Global
 		return *s_instance;
 	}
 
-	constexpr static size_t MAX_ROOMS				= 128;
-	constexpr static size_t NUM_SEND_TASK			= 2;
-	constexpr static size_t NUM_UPDATE_TASK			= 2;
+	constexpr static size_t MAX_ROOMS				= ServerConfig::MAX_ROOMS;
+	constexpr static size_t NUM_SEND_TASK			= ServerConfig::NUM_SEND_TASK;
+	constexpr static size_t NUM_UPDATE_TASK			= ServerConfig::NUM_UPDATE_TASK;
 
 	float					fixedDt = 0.016f;
 	ServerLoopHandler*		serverLoop = nullptr;
