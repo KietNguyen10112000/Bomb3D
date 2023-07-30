@@ -10,6 +10,8 @@
 #include "PlayerScript.h"
 #include "VictoryTowerScript.h"
 
+#include "GameUtils.h"
+
 String VictoryTowerUI::GetUIImagePath()
 {
 	return "buildings/victory_tower_0.png";
@@ -46,10 +48,15 @@ void VictoryTowerUI::SetInfo(PlayerScript* player, soft::GameObject2D* building)
 {
 	auto script = building->GetComponentRaw<VictoryTowerScript>();
 	script->m_team = &player->GetTeam();
-	script->m_remainTime = 10;
+	script->m_remainTime = 30;
 
 	player->GetTeam().hasVictoryTower = true;
 	//player->SetVictoryTower(script);
+
+	GameUtils::AddHpBar(building,
+		(player->GetTeamId() == Global::Get().GetMyTeamId()) ? sf::Color::Green : sf::Color::Red,
+		70, 100, &script->DynamicObjectProperties().hp
+	)->Position() = { -35, -85 };
 
 	if (player->GetTeamId() == Global::Get().GetMyTeamId())
 	{

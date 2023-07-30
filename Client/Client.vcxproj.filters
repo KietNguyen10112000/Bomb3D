@@ -273,6 +273,9 @@
     <ClInclude Include="GameFont.h">
       <Filter>Source Files</Filter>
     </ClInclude>
+    <ClInclude Include="Wall3x1Script.h">
+      <Filter>Source Files\Scripts\BuildingScript</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <Natvis Include="..\DebugView.natvis">

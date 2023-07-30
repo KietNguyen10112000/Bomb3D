@@ -125,7 +125,22 @@ public:
 
 			if (obj.object->Tag() != TAG::PLAYER)
 			{
-				m_scene->RemoveObject(GetObject());
+				if (obj.object->Tag() == TAG::BUILDING_0)
+				{
+					auto dynObj = obj.object->GetComponentRaw<BaseDynamicObjectScript>();
+					if (!dynObj)
+					{
+						m_scene->RemoveObject(GetObject());
+					}
+					else if (dynObj->TakeDamage(m_from, m_damage))
+					{
+						m_scene->RemoveObject(GetObject());
+					}
+				}
+				else
+				{
+					m_scene->RemoveObject(GetObject());
+				}
 			}
 			else
 			{

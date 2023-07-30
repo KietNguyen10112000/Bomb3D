@@ -210,6 +210,7 @@
     <ClInclude Include="VictoryTowerScript.h" />
     <ClInclude Include="VictoryTowerUI.h" />
     <ClInclude Include="Wall3x1Generator.h" />
+    <ClInclude Include="Wall3x1Script.h" />
     <ClInclude Include="Wall3x1UI.h" />
   </ItemGroup>
   <ItemGroup>

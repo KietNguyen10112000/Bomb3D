@@ -32,12 +32,17 @@ protected:
 		return true;
 	}
 
-public:
-	inline void TakeDamage(GameObject2D* from, float many)
+	virtual bool CanTakeDamage(GameObject2D* from, float many)
 	{
-		if (DynamicObjectProperties().hp == 0.0f)
+		return true;
+	}
+
+public:
+	inline bool TakeDamage(GameObject2D* from, float many)
+	{
+		if (DynamicObjectProperties().hp == 0.0f || !CanTakeDamage(from, many))
 		{
-			return;
+			return false;
 		}
 
 		many = std::clamp(many, 0.0f, DynamicObjectProperties().hp);
@@ -52,6 +57,8 @@ public:
 				GetScene()->RemoveObject(GetObject());
 			}
 		}
+
+		return true;
 	}
 
 	inline DynamicObjectProperties& DynamicObjectProperties()

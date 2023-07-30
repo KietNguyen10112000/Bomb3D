@@ -8,6 +8,7 @@
 
 #include "Global.h"
 #include "PlayerScript.h"
+#include "Wall3x1Script.h"
 
 String Wall3x1UI::GetUIImagePath()
 {
@@ -43,8 +44,13 @@ size_t Wall3x1UI::GetBuildingObjectGeneratorId()
 
 void Wall3x1UI::SetInfo(PlayerScript* player, GameObject2D* building)
 {
+	auto script = building->GetComponentRaw<Wall3x1Script>();
+	script->m_teamId = player->GetTeamId();
+	script->m_color = sf::Color::White;
+
 	if (Global::Get().GetMyTeamId() != player->GetTeamId())
 	{
+		script->m_color = { 255, 200, 200, 255 };
 		building->GetComponentRaw<SpriteRenderer>()->Sprite().SetColor(255, 200, 200, 255);
 	}
 }
