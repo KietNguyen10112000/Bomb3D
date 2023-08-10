@@ -1,0 +1,417 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<ClassDiagram MajorVersion="1" MinorVersion="1">
+  <Class Name="BaseDynamicObjectScript" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="3" Y="2.5" Width="2.75" />
+    <NestedTypes>
+      <Struct Name="BaseDynamicObjectScript::DynamicObjectProperties" Collapsed="true">
+        <TypeIdentifier>
+          <NewMemberFileName>BaseDynamicObjectScript.h</NewMemberFileName>
+        </TypeIdentifier>
+      </Struct>
+    </NestedTypes>
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAgAABgAAAAEAAAAAAAAABAAAAAAgACAgAA=</HashCode>
+      <FileName>BaseDynamicObjectScript.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Script2D" Collapsed="true" BaseTypeListCollapsed="true">
+    <Position X="3.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>MQyAAAIBIAQBgMggEgIAAAAAEgAAIBAMSBSACAEIAAA=</HashCode>
+      <FileName>D:\Temp\FinalProject\SoftEngine\Engine\Components2D\Script\Script2D.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BuildingUI" Collapsed="true">
+    <Position X="9.5" Y="1.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAgAAQBAAABAAQAAAAQAhQAAAYAAAAAAAAA=</HashCode>
+      <FileName>BuildingUI.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="COLLISION_MASK" Collapsed="true">
+    <Position X="22.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>COLLISION_MASK.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GameFont" Collapsed="true">
+    <Position X="25.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAEAEAAAAAAQAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>GameFont.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GameLoopHandler" Collapsed="true">
+    <Position X="27.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABKABAIAAAEAoAAEAAIABYAgAAAEIAAwAkAgGCMEACA=</HashCode>
+      <FileName>GameLoopHandler.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Preload" Collapsed="true">
+    <Position X="24" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABE=</HashCode>
+      <FileName>Preload.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="TAG" Collapsed="true">
+    <Position X="22.25" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>TAG.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="BulletScript" Collapsed="true">
+    <Position X="16.75" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAIAAAAACAAAAAgAAAAAAAACAAAAAhAgAAAAAAEAAAA=</HashCode>
+      <FileName>BulletScript.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FastBulletScript" Collapsed="true">
+    <Position X="7" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAMAAAAACAAAAAgAAAAAAAACAAAAAhAgAAAAAAEAAAA=</HashCode>
+      <FileName>BulletScript.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PlayerScript" Collapsed="true">
+    <Position X="10.75" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>GByAgRCARB4AJMiEMbC0UAADpIBYEvgUEuAAAQGIgIQ=</HashCode>
+      <FileName>PlayerScript.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="UIScript" Collapsed="true">
+    <Position X="14.5" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AgQQAAIABjAAAAkIEAkgAAkCAAAAgBAABQCAYgFAMAg=</HashCode>
+      <FileName>UIScript.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PyStdErrOutStreamRedirect" Collapsed="true">
+    <Position X="27.5" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ABAAABAAAAAAAAEAABAAAAAAAACAACAGAAAAAAAAAAA=</HashCode>
+      <FileName>UIConsole.cpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="UIConsoleImpl" Collapsed="true">
+    <Position X="1" Y="12.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>gEAAAAIABRABCAAAAAAgACAEACKBIAAQAAAIAAACAgA=</HashCode>
+      <FileName>UIConsole.cpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="UIConsole" Collapsed="true">
+    <Position X="1" Y="11" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAIAAAAAACBAAAAAAAAAAQEAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>UIConsole.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="UIDebugPathFinder" Collapsed="true">
+    <Position X="12" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAAAAAAAAAAAAAAAQAAAAAAAAQAAAABAAABAAAAA=</HashCode>
+      <FileName>UIDebugPathFinder.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Monster" Collapsed="true">
+    <Position X="14" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAAAAAQAkAAAAAAAASgAAAgxAIAAAAAAEAgAI=</HashCode>
+      <FileName>Monster.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="VictoryTowerScript" Collapsed="true">
+    <Position X="8.5" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAgAgAAAAAAAACEAAAABAAAAAAAAEAgAA=</HashCode>
+      <FileName>VictoryTowerScript.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="DebugRenderer" Collapsed="true">
+    <Position X="12" Y="9.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAABAAAAAAAAA=</HashCode>
+      <FileName>DebugRenderer.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ProcessBarRenderer" Collapsed="true">
+    <Position X="25.75" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAABAAAAAAIAAAAAAABAAAAAAAAQCAABEIAAAAAAA=</HashCode>
+      <FileName>ProcessBarRenderer.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MapRenderer" Collapsed="true">
+    <Position X="22.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAIBFAAIAEAAgEAAAAACAQBBAAAAAAAA=</HashCode>
+      <FileName>MapRenderer.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ByteStreamRead" Collapsed="true">
+    <Position X="7" Y="10" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAJAACARAAAAAQDAAAAABIAAAAAAAAAQAAAAAAAAEAA=</HashCode>
+      <FileName>D:\Temp\FinalProject\FinalProject\Synch\ByteStream.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ByteStream" Collapsed="true">
+    <Position X="7" Y="11.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAYAAAIABQQAAAAAAAAEAAAUAQAAAAAAAgAAQAg=</HashCode>
+      <FileName>D:\Temp\FinalProject\FinalProject\Synch\ByteStream.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PackageReceiver" Collapsed="true">
+    <Position X="27.5" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAQAAAAABQoAAAAAoAAAAAAABAAAAAABAAAAAAA=</HashCode>
+      <FileName>D:\Temp\FinalProject\FinalProject\Synch\Package.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PackageSender" Collapsed="true">
+    <Position X="29.25" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAABFAwAAAAAAEAAAAAAAAAAIAABAAAAAAA=</HashCode>
+      <FileName>D:\Temp\FinalProject\FinalProject\Synch\Package.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GameActions" Collapsed="true">
+    <Position X="24" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AABAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>D:\Temp\FinalProject\FinalProject\GameActions\GameActions.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="MatchStartAction" Collapsed="true">
+    <Position X="24" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAIAAKECIAAAAABhAIAAAgAAACBAgEiAAAiGAADABAA=</HashCode>
+      <FileName>D:\Temp\FinalProject\FinalProject\GameActions\MatchStartAction.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="UserInputAction" Collapsed="true">
+    <Position X="24" Y="3.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>ACAAAAIQAAIAAABAAAAAAAAAACBAgAgQAAEAAAAABAQ=</HashCode>
+      <FileName>D:\Temp\FinalProject\FinalProject\GameActions\UserInputAction.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="GameMap" Collapsed="true">
+    <Position X="29.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>IAIAAAAQQCAAAUCBABAAAAAAAABAAACIAASAAhJAAAA=</HashCode>
+      <FileName>GameMap.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PathFinder" Collapsed="true">
+    <Position X="22.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>YAQAgAAgAAAAQQIBAAACAABgQAAIAACAAAgAAhggAAA=</HashCode>
+      <FileName>PathFinder.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Item" Collapsed="true">
+    <Position X="4" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAACAAAABAAAAAAAAAAAAEAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Item.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Coin" Collapsed="true">
+    <Position X="4" Y="9.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAEAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Item.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="CoinRendererLoader" Collapsed="true">
+    <Position X="7.25" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ItemIconLoader.cpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="PistolRendererLoader" Collapsed="true">
+    <Position X="9.5" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ItemIconLoader.cpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SmgRendererLoader" Collapsed="true">
+    <Position X="11.75" Y="2.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ItemIconLoader.cpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ItemIconLoader" Collapsed="true">
+    <Position X="9.5" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAgAAAgAAAASAAAAAAAAAAAAAAgAAAAAAAAAAAgAI=</HashCode>
+      <FileName>ItemIconLoader.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="FlashUIScript" Collapsed="true">
+    <Position X="12.25" Y="0.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAgAEAAEAAACAAAAABAAAAAAAQEAAAA=</HashCode>
+      <FileName>Flash.cpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Flash" Collapsed="true">
+    <Position X="1" Y="9.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AIYAAAAAAAAgEABAAAAAAAAAAAgAABAgCAAAAAAQAAA=</HashCode>
+      <FileName>Flash.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Skill" Collapsed="true">
+    <Position X="1" Y="8" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AIQAAAAAAAAgEBBAAAAAAAAAAAgAAAAACAAAAAAQAgA=</HashCode>
+      <FileName>Skill.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SMG" Collapsed="true">
+    <Position X="9" Y="8.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAgAAAgAAgAAAAA=</HashCode>
+      <FileName>SMG.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Gun" Collapsed="true">
+    <Position X="9" Y="7" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAgAAAAAAAAAgAAAgAAgAAAAA=</HashCode>
+      <FileName>Gun.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Stopwatch" Collapsed="true">
+    <Position X="29.25" Y="2.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAAACAAAAAAAAAAAAAAACAAAACAAAAAAAAAAQA=</HashCode>
+      <FileName>Stopwatch.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ObjectGenerator" Collapsed="true">
+    <Position X="3.5" Y="5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAASAAAAAAAAAAIgAAgAAAQAAAAAAAAAA=</HashCode>
+      <FileName>ObjectGenerator.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="ObjectGeneratorId" Collapsed="true">
+    <Position X="25.75" Y="1.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>ObjectGeneratorId.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SlimeScript" Collapsed="true">
+    <Position X="14" Y="6.5" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAgQAAAABgAEAAAAAAiCAAAgBAAAAAASQEAAAA=</HashCode>
+      <FileName>SlimeGenerator.cpp</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="SlimeGenerator" Collapsed="true">
+    <Position X="1.25" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAEAAAAACAAAAAAAAABAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>SlimeGenerator.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="VictoryTowerGenerator" Collapsed="true">
+    <Position X="3.5" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAEAAAAgCAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>VictoryTowerGenerator.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Wall3x1Generator" Collapsed="true">
+    <Position X="5.75" Y="6.25" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAGAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>Wall3x1Generator.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="VictoryTowerUI" Collapsed="true">
+    <Position X="0.5" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAgAAAAAAABAAQAAAAQABQAAAIAAAAAAAAA=</HashCode>
+      <FileName>VictoryTowerUI.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Class Name="Wall3x1UI" Collapsed="true">
+    <Position X="19.75" Y="1" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAgAAAAAAABAAQAAAAQABQAAAIAAAAAAAAA=</HashCode>
+      <FileName>Wall3x1UI.h</FileName>
+    </TypeIdentifier>
+  </Class>
+  <Struct Name="GameSetting" Collapsed="true">
+    <Position X="25.75" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAABAACgAAyAAAAAAAAAAAAAAAAAAAAEQAAAAAAEAAA=</HashCode>
+      <FileName>GameSetting.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="Global" Collapsed="true">
+    <Position X="27.5" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AEACBIAAABQAAABACiAABAGAQA0EBAAANAAAAhAAAAA=</HashCode>
+      <FileName>Global.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="Package" Collapsed="true">
+    <Position X="22.25" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAACAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>D:\Temp\FinalProject\FinalProject\Synch\Package.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="GameActionConfig" Collapsed="true">
+    <Position X="22.25" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>D:\Temp\FinalProject\FinalProject\GameActions\GameActionConfig.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="UserInput" Collapsed="true">
+    <Position X="25.75" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AABAAAESAAEEggAAACAIAAAAAAAwAAgAACAAQAQAAAQ=</HashCode>
+      <FileName>D:\Temp\FinalProject\FinalProject\GameActions\UserInputAction.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="InGameAPIPlayerData" Collapsed="true">
+    <Position X="29.25" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAAAAAAAAAAAAAAAAAAAAAAAQAAQAAAABAAAAAAAA=</HashCode>
+      <FileName>InGameAPI.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="GameConfig" Collapsed="true">
+    <Position X="24" Y="4.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAAAEAAAAAAAAAAAAAAAAAAAAABAAAAAAAAAAAAAAAA=</HashCode>
+      <FileName>GameConfig.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Struct Name="TeamInfo" Collapsed="true">
+    <Position X="24" Y="5.75" Width="1.5" />
+    <TypeIdentifier>
+      <HashCode>AAQAAAAACAAAAAAAAAAABAEAAAAAAAAAAAAAAAAAAgA=</HashCode>
+      <FileName>TeamInfo.h</FileName>
+    </TypeIdentifier>
+  </Struct>
+  <Font Name="Segoe UI" Size="9" />
+</ClassDiagram>

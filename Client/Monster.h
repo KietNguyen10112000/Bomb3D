@@ -8,6 +8,7 @@ using namespace soft;
 #include "Global.h"
 
 #include "BaseDynamicObjectScript.h"
+#include "TAG.h"
 
 class Monster : Traceable<Monster>, public BaseDynamicObjectScript
 {
@@ -38,6 +39,11 @@ public:
 	virtual void OnIdle() {};
 	virtual void OnMove(const Vec2& dir) {};
 	virtual void OnMonsterDestroyed(GameObject2D* by) {};
+
+	virtual float GetDamagePerTick() 
+	{
+		return 0.5f;
+	};
 
 public:
 	//virtual void OnStart() override
@@ -121,6 +127,11 @@ public:
 		}
 
 		//std::cout << "Enter " << m_collisionCount << "\n";
+
+		if (another->Tag() == TAG::PLAYER)
+		{
+			another->GetComponentRaw<BaseDynamicObjectScript>()->TakeDamage(another, GetDamagePerTick());
+		}
 	}
 
 	//virtual void OnCollisionExit(GameObject2D* another, const Collision2DPair& pair) override
