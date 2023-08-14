@@ -13,8 +13,14 @@ class GameMgr
 public:
 	constexpr static size_t MAP_SIZE = 6;
 
+	size_t m_width = 0;
+	size_t m_height = 0;
+
 	inline void GenerateMonsters(MatchStartAction* action, byte* map, size_t width, size_t height)
 	{
+		m_width = width;
+		m_height = height;
+
 		auto& monsters = action->m_mapMonstersId;
 		auto& items = action->m_mapItems;
 
@@ -46,6 +52,17 @@ public:
 			auto idy = y * width;
 			auto row = &monsters[idy];
 			for (size_t x = 0; x < 10; x++)
+			{
+				row[x] = 255;
+			}
+		}
+
+		// no monsters at players start location
+		for (size_t y = height - 10; y < height; y++)
+		{
+			auto idy = y * width;
+			auto row = &monsters[idy];
+			for (size_t x = width - 10; x < width; x++)
 			{
 				row[x] = 255;
 			}
@@ -138,7 +155,14 @@ public:
 
 	inline void SetPlayerPos(ID id, Vec2& outputPos)
 	{
-		outputPos.x = (3 + id) * 60.0f;
-		outputPos.y = 3 * 60.0f;
+		//if (id % 2 == 0)
+		{
+			outputPos.x = (3 + id) * 60.0f;
+			outputPos.y = 3 * 60.0f;
+			return;
+		}
+
+		/*outputPos.x = m_width * 60.0f - (3 + id) * 60.0f;
+		outputPos.y = m_height * 60.0f - 3 * 60.0f;*/
 	}
 };
